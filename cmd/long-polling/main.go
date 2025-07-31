@@ -15,9 +15,6 @@ func main() {
 
 	response, err := services.GetMessages(conn, "start")
 
-	fmt.Println("Messages received:")
-	fmt.Println(response.Message)
-
 	if err != nil {
 		services.FinishStream(conn, response.PIPullNext)
 		panic("Error getting messages: %v\n" + err.Error())
