@@ -1,95 +1,18 @@
-package main
+package services
 
 import (
 	"bufio"
 	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"time"
+	"strconv"
 )
 
 type GetMessageResponse struct {
 	Message    string
 	PIPullNext string
 	resourceID string
-}
-
-func main() {
-	conn := CreateConnection()
-	fmt.Println("=== TLS Connection Test Completed ===")
-
-	fmt.Println("Sending HTTP/1.0 request...")
-
-	var response *GetMessageResponse
-
-	response, err := GetMessages(conn, "start")
-
-	fmt.Println("Messages received:")
-	fmt.Println(response.Message)
-
-	if err != nil {
-		FinishStream(conn, response.PIPullNext)
-		panic("Error getting messages: %v\n" + err.Error())
-		return
-	}
-
-	for {
-		time.Sleep(1 * time.Second)
-		connection := CreateConnection()
-		response, err = GetMessages(connection, response.PIPullNext)
-		if err != nil {
-			FinishStream(connection, response.PIPullNext)
-			fmt.Printf("Error getting messages: %v\n", err)
-			break
-		}
-
-		fmt.Println("Messages received:")
-		fmt.Println(response.Message)
-	}
-
-	//FinishStream(conn, "/api/v1/out/52833288/stream/11e5d52c-e302-4aec-af0a-83b3f068d26a")
-}
-
-func ConfigureMTLS() *tls.Config {
-	caCert, _ := os.ReadFile("/home/roger/projects/lb/mTLS/certs/Cadeia_Oficial.p7b")
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	cert, _ := tls.LoadX509KeyPair("/home/roger/projects/lb/mTLS/certs/certificado-25065760.cer", "/home/roger/projects/lb/mTLS/certs/spb_hm_private_unencrypted.key")
-
-	// Configure TLS
-	tlsConfig := &tls.Config{
-		Certificates:       []tls.Certificate{cert},
-		RootCAs:            caCertPool,
-		MinVersion:         tls.VersionTLS12,                                    // --tlsv1.2
-		MaxVersion:         tls.VersionTLS12,                                    // Force TLS 1.2
-		CipherSuites:       []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256}, // --ciphers
-		InsecureSkipVerify: true,                                                // -k flag (skip verification)
-	}
-
-	return tlsConfig
-}
-
-func CreateConnection() *tls.Conn {
-	fmt.Println("=== Testing TLS Connection ===")
-
-	tlsConfig := ConfigureMTLS()
-
-	conn, err := tls.Dial("tcp", "127.0.0.1:16522", tlsConfig)
-	if err != nil {
-		fmt.Printf("TLS connection failed: %v\n", err)
-		return nil
-	}
-
-	fmt.Println("TLS connection successful!")
-	fmt.Printf("TLS Version: %x\n", conn.ConnectionState().Version)
-	fmt.Printf("Cipher Suite: %x\n", conn.ConnectionState().CipherSuite)
-	fmt.Printf("Server Certificates: %d\n", len(conn.ConnectionState().PeerCertificates))
-
-	return conn
 }
 
 func StartStream(conn *tls.Conn) (*GetMessageResponse, error) {
@@ -191,7 +114,6 @@ func FinishStream(conn *tls.Conn, pullNext string) error {
 
 	request := "DELETE " + pullNext + " HTTP/1.2\r\n" +
 		"Host: icom-h.pi.rsfn.net.br\r\n" +
-		//"Accept: multipart/mixed\r\n" +
 		"User-Agent: Go-http-client/1.2\r\n" +
 		"Connection: Close\r\n\r\n"
 
@@ -222,5 +144,44 @@ func FinishStream(conn *tls.Conn, pullNext string) error {
 
 	fmt.Println("Stream finished successfully.")
 
+	return nil
+}
+
+func PostMessage(conn *tls.Conn, content string) error {
+	fmt.Println("Sending message...")
+
+	contentLength := len(content)
+
+	request := "POST /api/v1/in/52833288/msgs HTTP/1.2\r\n" +
+		"Host: icom-h.pi.rsfn.net.br\r\n" +
+		"Content-Type: application/xml; charset=utf-8\r\n" +
+		"Content-Length: " + strconv.Itoa(contentLength) + "\r\n" +
+		"User-Agent: Go-http-client/1.1\r\n" +
+		"Connection: close\r\n\r\n" +
+		content
+
+	_, err := conn.Write([]byte(request))
+	if err != nil {
+		fmt.Printf("Failed to write request: %v\n", err)
+		return err
+	}
+
+	_, err = conn.Write([]byte(content))
+
+	if err != nil {
+		fmt.Printf("Failed to write content: %v\n", err)
+		return err
+	}
+
+	reader := bufio.NewReader(conn)
+	resp, err := http.ReadResponse(reader, nil)
+	if err != nil {
+		fmt.Printf("Failed to parse response: %v\n", err)
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	fmt.Printf("Status: %s\n", resp.Status)
 	return nil
 }
