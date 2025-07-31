@@ -8,10 +8,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 type GetMessageResponse struct {
-	Messages   string
+	Message    string
 	PIPullNext string
 	resourceID string
 }
@@ -22,11 +23,34 @@ func main() {
 
 	fmt.Println("Sending HTTP/1.0 request...")
 
+	var response *GetMessageResponse
+
 	response, err := GetMessages(conn, "start")
 
+	fmt.Println("Messages received:")
+	fmt.Println(response.Message)
+
 	if err != nil {
-		panic(err)
+		FinishStream(conn, response.PIPullNext)
+		panic("Error getting messages: %v\n" + err.Error())
+		return
 	}
+
+	for {
+		time.Sleep(1 * time.Second)
+		connection := CreateConnection()
+		response, err = GetMessages(connection, response.PIPullNext)
+		if err != nil {
+			FinishStream(connection, response.PIPullNext)
+			fmt.Printf("Error getting messages: %v\n", err)
+			break
+		}
+
+		fmt.Println("Messages received:")
+		fmt.Println(response.Message)
+	}
+
+	//FinishStream(conn, "/api/v1/out/52833288/stream/11e5d52c-e302-4aec-af0a-83b3f068d26a")
 }
 
 func ConfigureMTLS() *tls.Config {
@@ -75,7 +99,7 @@ func StartStream(conn *tls.Conn) (*GetMessageResponse, error) {
 		"Host: icom-h.pi.rsfn.net.br\r\n" +
 		//"Accept: multipart/mixed\r\n" +
 		"User-Agent: Go-http-client/1.2\r\n" +
-		"Connection: Keep-Alive\r\n\r\n"
+		"Connection: Close\r\n\r\n"
 
 	_, err := conn.Write([]byte(request))
 	if err != nil {
@@ -105,9 +129,9 @@ func StartStream(conn *tls.Conn) (*GetMessageResponse, error) {
 	fmt.Println("Stream started successfully.")
 
 	return &GetMessageResponse{
-		Messages:   string(body),
-		PIPullNext: resp.Header.Get("PIPull-Next"),
-		resourceID: resp.Header.Get("Resource-ID"),
+		Message:    string(body),
+		PIPullNext: resp.Header.Get("Pi-Pull-Next"),
+		resourceID: resp.Header.Get("Pi-Resourceid"),
 	}, nil
 }
 
@@ -116,6 +140,87 @@ func GetMessages(conn *tls.Conn, step string) (*GetMessageResponse, error) {
 		return StartStream(conn)
 	}
 
-	fmt.Println("Invalid step. Only 'start' is supported for now.")
-	return nil, nil
+	return GetMessage(conn, step)
+}
+
+func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
+	fmt.Println("Starting stream...")
+
+	request := "GET " + pullnext + " HTTP/1.2\r\n" +
+		"Host: icom-h.pi.rsfn.net.br\r\n" +
+		//"Accept: multipart/mixed\r\n" +
+		"User-Agent: Go-http-client/1.2\r\n" +
+		"Connection: Close\r\n\r\n"
+
+	_, err := conn.Write([]byte(request))
+	if err != nil {
+		fmt.Printf("Failed to write request: %v\n", err)
+		return nil, err
+	}
+
+	reader := bufio.NewReader(conn)
+	resp, err := http.ReadResponse(reader, nil)
+	if err != nil {
+		fmt.Printf("Failed to parse response: %v\n", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("Failed to read body: %v\n", err)
+		return nil, err
+	}
+
+	fmt.Printf("Status: %s\n", resp.Status)
+	fmt.Printf("Body received (%d bytes)\n", len(body))
+	fmt.Printf("Body: %s\n", body)
+	fmt.Printf("Headers: %v\n", resp.Header)
+
+	fmt.Println("Stream started successfully.")
+
+	return &GetMessageResponse{
+		Message:    string(body),
+		PIPullNext: resp.Header.Get("PI-Pull-Next"),
+		resourceID: resp.Header.Get("Pi-Resourceid"),
+	}, nil
+}
+
+func FinishStream(conn *tls.Conn, pullNext string) error {
+	fmt.Println("Finishing stream...")
+
+	request := "DELETE " + pullNext + " HTTP/1.2\r\n" +
+		"Host: icom-h.pi.rsfn.net.br\r\n" +
+		//"Accept: multipart/mixed\r\n" +
+		"User-Agent: Go-http-client/1.2\r\n" +
+		"Connection: Close\r\n\r\n"
+
+	_, err := conn.Write([]byte(request))
+	if err != nil {
+		fmt.Printf("Failed to write request: %v\n", err)
+		return err
+	}
+
+	reader := bufio.NewReader(conn)
+	resp, err := http.ReadResponse(reader, nil)
+	if err != nil {
+		fmt.Printf("Failed to parse response: %v\n", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("Failed to read body: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("Status: %s\n", resp.Status)
+	fmt.Printf("Body received (%d bytes)\n", len(body))
+	fmt.Printf("Body: %s\n", body)
+	fmt.Printf("Headers: %v\n", resp.Header)
+
+	fmt.Println("Stream finished successfully.")
+
+	return nil
 }
