@@ -30,9 +30,6 @@ func main() {
 			fmt.Printf("Error getting messages: %v\n", err)
 			break
 		}
-
-		fmt.Println("Messages received:")
-		fmt.Println(response.Message)
 	}
 
 	//services.FinishStream(conn, "/api/v1/out/52833288/stream/11e5d52c-e302-4aec-af0a-83b3f068d26a")
