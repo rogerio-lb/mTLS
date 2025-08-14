@@ -166,13 +166,6 @@ func PostMessage(conn *tls.Conn, content string) error {
 		return err
 	}
 
-	_, err = conn.Write([]byte(content))
-
-	if err != nil {
-		fmt.Printf("Failed to write content: %v\n", err)
-		return err
-	}
-
 	reader := bufio.NewReader(conn)
 	resp, err := http.ReadResponse(reader, nil)
 	if err != nil {

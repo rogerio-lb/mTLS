@@ -1,12 +1,25 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
+	"io"
 	"mTLS/services"
+	"os/exec"
 )
 
+const (
+	msgIdPrefix    = "M"
+	msgIdISPBLen   = 8
+	msgIdSuffixLen = 23
+	// All alphanumeric characters as per SPI specification [a-z|A-Z|0-9]
+	msgIdAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+)
+
+var randReader io.Reader = rand.Reader
+
 var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Envelope xmlns="https://www.bcb.gov.br/pi/pibr.001/1.3">
+<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.008/1.13">
     <AppHdr>
         <Fr>
             <FIId>
@@ -26,65 +39,119 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 </FinInstnId>
             </FIId>
         </To>
-        <BizMsgIdr>M528332880884965a4f82c427ae16bcf</BizMsgIdr>
-        <MsgDefIdr>pibr.001.spi.1.3</MsgDefIdr>
-        <CreDt>2025-07-03T18:04:00.000Z</CreDt>
-		<Sgntr>
-            <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
-                <ds:SignedInfo>
-                    <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-                    <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
-                    <ds:Reference URI="#key-info-id">
-                        <ds:Transforms>
-                            <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-                        </ds:Transforms>
-                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-                        <ds:DigestValue>YsJJMDNL6aFmCwNgnAjeTlQshWGxH+4IkHegixG7eAk=</ds:DigestValue>
-                    </ds:Reference>
-                    <ds:Reference URI="">
-                        <ds:Transforms>
-                            <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-                            <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-                        </ds:Transforms>
-                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-                        <ds:DigestValue>CUV14SRYW6vbJnIutRRt9zg9haO6c0O+hTdBQakSfFA=</ds:DigestValue>
-                    </ds:Reference>
-                    <ds:Reference>
-                        <ds:Transforms>
-                            <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
-                        </ds:Transforms>
-                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-                        <ds:DigestValue>KIYsuJEgu6CFWEtI7dVxIxdZZhAx6aqdblI3rIoZ8xc=</ds:DigestValue>
-                    </ds:Reference>
-                </ds:SignedInfo>
-                <ds:SignatureValue>cwuC3G6afQlkjdquk6ot5tsZQ21xxX+wK/rbbF6hfhBJqnGimWkObuNwZS/GTKa71qZbY/3Ndyk9&#13;
-MipqlbSQBKL5PHatgrowqn/Ow7Vtu8NpEhXMeD0nI3f3ceqyb89PMCwo+fug59Dst+zQ47PEtuIt&#13;
-X5WVnNlluZSpRzIJfeBQOp/hRmp1NySr35rTmsZ067klTSoli4B2ZKnWd5WTCeijzvvUIIKwh0kl&#13;
-tkPRgaOYpy9QRWZ45d42+kcGvndWH+XRiBFtVWLyKwR2OLwBJQdur3ff0OSpLmYS1PyN25yH8cD0&#13;
-syeVgETjwdiGUNeZrsRHqFqYauwZW0HH+o9nNQ==</ds:SignatureValue>
-                <ds:KeyInfo Id="key-info-id">
-                    <ds:X509Data>
-                        <ds:X509IssuerSerial>
-                            <ds:X509IssuerName>CN=Autoridade Certificadora do SERPRO Final SSL, OU=Servico Federal de Processamento de Dados - SERPRO, OU=CSPB-1, O=ICP-Brasil, C=BR</ds:X509IssuerName>
-                            <ds:X509SerialNumber>5529224565488886204649542255</ds:X509SerialNumber>
-                        </ds:X509IssuerSerial>
-                    </ds:X509Data>
-                </ds:KeyInfo>
-            </ds:Signature>
-        </Sgntr>
+        <BizMsgIdr>M52833288202508141640Mq7fgRaca2N</BizMsgIdr>
+        <MsgDefIdr>pacs.008.spi.1.13</MsgDefIdr>
+        <CreDt>2020-01-01T08:30:12.000Z</CreDt>
+        <Sgntr/>
     </AppHdr>
     <Document>
-        <EchoReq>
+        <FIToFICstmrCdtTrf>
             <GrpHdr>
-                <MsgId>M528332880884965a4f82c427ae16bcf</MsgId>
-                <CreDtTm>2025-07-01T20:15:00.000Z</CreDtTm>
+                <MsgId>M5283328820250814121142</MsgId>
+                <CreDtTm>2020-01-01T08:30:12.000Z</CreDtTm>
+                <NbOfTxs>1</NbOfTxs>
+                <SttlmInf>
+                    <SttlmMtd>CLRG</SttlmMtd>
+                </SttlmInf>
+                <PmtTpInf>
+                    <InstrPrty>HIGH</InstrPrty>
+                    <SvcLvl>
+                        <Prtry>PAGPRI</Prtry>
+                    </SvcLvl>
+                </PmtTpInf>
             </GrpHdr>
-            <EchoTxInf>
-                <Data>Teste 1</Data>
-            </EchoTxInf>
-        </EchoReq>
+            <CdtTrfTxInf>
+                <PmtId>
+                    <EndToEndId>E9999901012341234123412345678900</EndToEndId>
+                </PmtId>
+                <IntrBkSttlmAmt Ccy="BRL">1000.00</IntrBkSttlmAmt>
+                <AccptncDtTm>2020-01-01T08:30:00.000Z</AccptncDtTm>
+                <ChrgBr>SLEV</ChrgBr>
+                <MndtRltdInf>
+                    <Tp>
+                        <LclInstrm>
+                            <Prtry>MANU</Prtry>
+                        </LclInstrm>
+                    </Tp>
+                </MndtRltdInf>
+                <Dbtr>
+                    <Nm>Fulano da Silva</Nm>
+                    <Id>
+                        <PrvtId>
+                            <Othr>
+                                <Id>70000000000</Id>
+                            </Othr>
+                        </PrvtId>
+                    </Id>
+                </Dbtr>
+                <DbtrAcct>
+                    <Id>
+                        <Othr>
+                            <Id>500000</Id>
+                            <Issr>3000</Issr>
+                        </Othr>
+                    </Id>
+                    <Tp>
+                        <Cd>CACC</Cd>
+                    </Tp>
+                </DbtrAcct>
+                <DbtrAgt>
+                    <FinInstnId>
+                        <ClrSysMmbId>
+                            <MmbId>10000000</MmbId>
+                        </ClrSysMmbId>
+                    </FinInstnId>
+                </DbtrAgt>
+                <CdtrAgt>
+                    <FinInstnId>
+                        <ClrSysMmbId>
+                            <MmbId>20000000</MmbId>
+                        </ClrSysMmbId>
+                    </FinInstnId>
+                </CdtrAgt>
+                <Cdtr>
+                    <Id>
+                        <PrvtId>
+                            <Othr>
+                                <Id>80000000000</Id>
+                            </Othr>
+                        </PrvtId>
+                    </Id>
+                </Cdtr>
+                <CdtrAcct>
+                    <Id>
+                        <Othr>
+                            <Id>600000</Id>
+                            <Issr>4000</Issr>
+                        </Othr>
+                    </Id>
+                    <Tp>
+                        <Cd>SVGS</Cd>
+                    </Tp>
+                </CdtrAcct>
+                <Purp>
+                    <Cd>IPAY</Cd>
+                </Purp>
+                <RmtInf>
+                    <Ustrd>Campo livre [0]</Ustrd>
+                </RmtInf>
+            </CdtTrfTxInf>
+        </FIToFICstmrCdtTrf>
     </Document>
 </Envelope>`
+
+func callJavaFunction(message string) (string, error) {
+	// Run Java program with message as argument
+	cmd := exec.Command("java", "-jar", "/home/roger/projects/lb/signer-java/target/signer-java-1.0-SNAPSHOT.jar", "-a", message)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("failed to run Java: %v", err)
+	}
+
+	fmt.Print(string(output))
+
+	return string(output), nil
+}
 
 func main() {
 	conn := services.CreateConnection()
@@ -93,9 +160,38 @@ func main() {
 		panic("Failed to create TLS connection")
 	}
 
-	err := services.PostMessage(conn, pibr001)
+	str, err := callJavaFunction(pibr001)
+
+	if err != nil {
+		fmt.Println("Error calling Java function:", err)
+		return
+	}
+
+	err = services.PostMessage(conn, str)
 
 	if err != nil {
 		fmt.Println("Error posting message:", err)
 	}
+
+	/*id, _ := GenerateMsgId("52833288")
+
+	fmt.Println("Generated Message ID:", id)*/
+
+	//message, _ := document.New()
+}
+
+func GenerateMsgId(ispb string) (string, error) {
+	// Generate random bytes
+	randomBytes := make([]byte, msgIdSuffixLen)
+	if _, err := randReader.Read(randomBytes); err != nil {
+		return "", fmt.Errorf("failed to generate random bytes: %w", err)
+	}
+
+	// Convert random bytes to alphanumeric characters
+	suffix := make([]byte, msgIdSuffixLen)
+	for i := 0; i < msgIdSuffixLen; i++ {
+		suffix[i] = msgIdAlphabet[randomBytes[i]%byte(len(msgIdAlphabet))]
+	}
+
+	return msgIdPrefix + ispb + string(suffix), nil
 }

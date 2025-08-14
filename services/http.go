@@ -12,7 +12,7 @@ func ConfigureMTLS() *tls.Config {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
 
-	cert, _ := tls.LoadX509KeyPair("/home/roger/projects/lb/mTLS/certs/certificado-25065760.cer", "/home/roger/projects/lb/mTLS/certs/spb_hm_private_unencrypted.key")
+	cert, _ := tls.LoadX509KeyPair("certs/certificado-25065760.cer", "certs/spb_hm_private_unencrypted.key")
 
 	// Configure TLS
 	tlsConfig := &tls.Config{
