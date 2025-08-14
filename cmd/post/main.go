@@ -142,7 +142,7 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 func callJavaFunction(message string) (string, error) {
 	// Run Java program with message as argument
-	cmd := exec.Command("java", "-jar", "/home/roger/projects/lb/signer-java/target/signer-java-1.0-SNAPSHOT.jar", "-a", message)
+	cmd := exec.Command("java", "-jar", "java/signer.jar", "-a", message)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("failed to run Java: %v", err)
