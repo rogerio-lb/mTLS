@@ -2,10 +2,15 @@ package main
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"mTLS/services"
+	ramdom "math/rand"
 	"os/exec"
+	"regexp"
+	"strings"
+	"time"
 )
 
 const (
@@ -14,11 +19,31 @@ const (
 	msgIdSuffixLen = 23
 	// All alphanumeric characters as per SPI specification [a-z|A-Z|0-9]
 	msgIdAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	returnIdPrefix    = "D"
+	returnIdISPBLen   = 8
+	returnIdSuffixLen = 11
+	// All alphanumeric characters as per SPI specification [a-z|A-Z|0-9]
+	returnIdAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+)
+
+var (
+	// pacsRandReader is used to make testing easier by allowing us to replace the random source
+	pacsRandReader io.Reader = rand.Reader
+
+	// numericPattern validates that a string contains only digits
+	numericPattern = regexp.MustCompile(`^[0-9]{8}$`)
+
+	// alphanumericPattern validates that a string contains only alphanumeric characters
+	alphanumericPattern = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+
+	// getCurrentTime is used to make testing easier by allowing us to replace the current time
+	getCurrentTime = time.Now
 )
 
 var randReader io.Reader = rand.Reader
 
-var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Envelope xmlns="https://www.bcb.gov.br/pi/pacs.008/1.13">
     <AppHdr>
         <Fr>
@@ -34,21 +59,21 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>00038166</Id>
+                        <Id>01181521</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
         </To>
-        <BizMsgIdr>M52833288202508141640Mq7fgRaca2N</BizMsgIdr>
+        <BizMsgIdr>%s</BizMsgIdr>
         <MsgDefIdr>pacs.008.spi.1.13</MsgDefIdr>
-        <CreDt>2020-01-01T08:30:12.000Z</CreDt>
+        <CreDt>%s</CreDt>
         <Sgntr/>
     </AppHdr>
     <Document>
         <FIToFICstmrCdtTrf>
             <GrpHdr>
-                <MsgId>M5283328820250814121142</MsgId>
-                <CreDtTm>2020-01-01T08:30:12.000Z</CreDtTm>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
                 <NbOfTxs>1</NbOfTxs>
                 <SttlmInf>
                     <SttlmMtd>CLRG</SttlmMtd>
@@ -62,7 +87,7 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             </GrpHdr>
             <CdtTrfTxInf>
                 <PmtId>
-                    <EndToEndId>E9999901012341234123412345678900</EndToEndId>
+                    <EndToEndId>%s</EndToEndId>
                 </PmtId>
                 <IntrBkSttlmAmt Ccy="BRL">1000.00</IntrBkSttlmAmt>
                 <AccptncDtTm>2020-01-01T08:30:00.000Z</AccptncDtTm>
@@ -75,11 +100,11 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     </Tp>
                 </MndtRltdInf>
                 <Dbtr>
-                    <Nm>Fulano da Silva</Nm>
+                    <Nm>Rogerio Inacio</Nm>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>70000000000</Id>
+                                <Id>14811554744</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -87,8 +112,8 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <DbtrAcct>
                     <Id>
                         <Othr>
-                            <Id>500000</Id>
-                            <Issr>3000</Issr>
+                            <Id>0038952</Id>
+                            <Issr>0001</Issr>
                         </Othr>
                     </Id>
                     <Tp>
@@ -113,7 +138,7 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>80000000000</Id>
+                                <Id>14811554744</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -121,22 +146,223 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>600000</Id>
-                            <Issr>4000</Issr>
+                            <Id>00384912</Id>
+                            <Issr>0001</Issr>
                         </Othr>
                     </Id>
                     <Tp>
-                        <Cd>SVGS</Cd>
+                        <Cd>CACC</Cd>
                     </Tp>
                 </CdtrAcct>
                 <Purp>
                     <Cd>IPAY</Cd>
                 </Purp>
                 <RmtInf>
-                    <Ustrd>Campo livre [0]</Ustrd>
+                    <Ustrd>Teste 1</Ustrd>
                 </RmtInf>
             </CdtTrfTxInf>
         </FIToFICstmrCdtTrf>
+    </Document>
+</Envelope>`
+
+var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/pibr.001/1.3">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>M52833288bfefffd6533b49708ba8101</BizMsgIdr>
+        <MsgDefIdr>pibr.001.spi.1.3</MsgDefIdr>
+        <CreDt>2020-04-07T13:47:22.580Z</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <EchoReq>
+            <GrpHdr>
+                <MsgId>M52833288bfefffd6533b49708ba8101</MsgId>
+                <CreDtTm>2020-04-07T13:47:22.580Z</CreDtTm>
+            </GrpHdr>
+            <EchoTxInf>
+                <Data>Campo livre</Data>
+            </EchoTxInf>
+        </EchoReq>
+    </Document>
+</Envelope>`
+
+var camt060 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/camt.060/1.9">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>camt.060.spi.1.9</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <AcctRptgReq>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+            </GrpHdr>
+            <RptgReq>
+                <ReqdMsgNmId>camt.053</ReqdMsgNmId>
+                <AcctOwnr>
+                    <Agt>
+                        <FinInstnId>
+                            <ClrSysMmbId>
+                                <MmbId>99999010</MmbId>
+                            </ClrSysMmbId>
+                        </FinInstnId>
+                    </Agt>
+                </AcctOwnr>
+                <ReqdBalTp>
+                    <CdOrPrtry>
+                        <Prtry>CSA</Prtry>
+                    </CdOrPrtry>
+                </ReqdBalTp>
+            </RptgReq>
+        </AcctRptgReq>
+    </Document>
+</Envelope>`
+
+var pacs004 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.004/1.5">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>pacs.004.spi.1.5</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <PmtRtr>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+                <NbOfTxs>1</NbOfTxs>
+                <SttlmInf>
+                    <SttlmMtd>CLRG</SttlmMtd>
+                </SttlmInf>
+            </GrpHdr>
+            <TxInf>
+                <RtrId>%s</RtrId>
+                <OrgnlEndToEndId>%s</OrgnlEndToEndId>
+                <RtrdIntrBkSttlmAmt Ccy="BRL">1000.00</RtrdIntrBkSttlmAmt>
+                <SttlmPrty>HIGH</SttlmPrty>
+                <ChrgBr>SLEV</ChrgBr>
+                <RtrRsnInf>
+                    <Rsn>
+                        <Cd>BE08</Cd>
+                    </Rsn>
+                </RtrRsnInf>
+                <OrgnlTxRef>
+                    <DbtrAgt>
+                        <FinInstnId>
+                            <ClrSysMmbId>
+                                <MmbId>99999009</MmbId>
+                            </ClrSysMmbId>
+                        </FinInstnId>
+                    </DbtrAgt>
+                    <CdtrAgt>
+                        <FinInstnId>
+                            <ClrSysMmbId>
+                                <MmbId>99999010</MmbId>
+                            </ClrSysMmbId>
+                        </FinInstnId>
+                    </CdtrAgt>
+                </OrgnlTxRef>
+            </TxInf>
+        </PmtRtr>
+    </Document>
+</Envelope>`
+
+var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.14">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>pacs.002.spi.1.14</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <FIToFIPmtStsRpt>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+            </GrpHdr>
+            <TxInfAndSts>
+                <OrgnlInstrId>%s</OrgnlInstrId>
+                <OrgnlEndToEndId>%s</OrgnlEndToEndId>
+                <TxSts>ACSP</TxSts>
+            </TxInfAndSts>
+        </FIToFIPmtStsRpt>
     </Document>
 </Envelope>`
 
@@ -154,13 +380,29 @@ func callJavaFunction(message string) (string, error) {
 }
 
 func main() {
+	now := getCurrentTime().UTC()
+
+	endToEndID, _ := GenerateEndToEndId("52833288", now)
+	//endToEndID2, _ := GenerateEndToEndId("00038166", now)
+
+	id, _ := GenerateMsgId("52833288")
+
+	//returnId := GenerateReturnId("52833288")
+
+	ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID) //pacs008
+	//ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, endToEndID) //pacs004
+	//ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, endToEndID2) //pacs002
+	//ready := fmt.Sprintf(camt060, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060
+
 	conn := services.CreateConnection()
 
 	if conn == nil {
 		panic("Failed to create TLS connection")
 	}
 
-	str, err := callJavaFunction(pibr001)
+	str, err := callJavaFunction(ready)
+
+	fmt.Printf("Generated PACS.008 message:\n%s\n", str)
 
 	if err != nil {
 		fmt.Println("Error calling Java function:", err)
@@ -172,12 +414,6 @@ func main() {
 	if err != nil {
 		fmt.Println("Error posting message:", err)
 	}
-
-	/*id, _ := GenerateMsgId("52833288")
-
-	fmt.Println("Generated Message ID:", id)*/
-
-	//message, _ := document.New()
 }
 
 func GenerateMsgId(ispb string) (string, error) {
@@ -194,4 +430,61 @@ func GenerateMsgId(ispb string) (string, error) {
 	}
 
 	return msgIdPrefix + ispb + string(suffix), nil
+}
+
+func GenerateEndToEndId(ident string, t time.Time) (string, error) {
+	// Validate identifier format
+	if !numericPattern.MatchString(ident) {
+		return "", fmt.Errorf("identifier must be exactly 8 numeric digits")
+	}
+
+	// Validate timestamp is within 12 hours of current time
+	now := getCurrentTime().UTC()
+	diff := t.UTC().Sub(now)
+	if diff < -12*time.Hour || diff > 12*time.Hour {
+		return "", fmt.Errorf("timestamp must be within 12 hours of current time")
+	}
+
+	timestamp := t.UTC().Format("200601021504")
+
+	randomBytes := make([]byte, 8)
+	if _, err := pacsRandReader.Read(randomBytes); err != nil {
+		return "", fmt.Errorf("failed to generate random bytes: %w", err)
+	}
+
+	suffix := base64.RawURLEncoding.EncodeToString(randomBytes)
+	suffix = strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			return r
+		}
+		return -1
+	}, suffix)
+
+	if len(suffix) > 11 {
+		suffix = suffix[:11]
+	}
+	for len(suffix) < 11 {
+		suffix += "0" // padding if needed
+	}
+
+	return fmt.Sprintf("E%s%s%s", ident, timestamp, suffix), nil
+}
+
+func GenerateRandomAlphanumeric(length int) string {
+	result := make([]byte, length)
+	for i := 0; i < length; i++ {
+		result[i] = returnIdAlphabet[ramdom.Intn(len(returnIdAlphabet))]
+	}
+	return string(result)
+}
+
+func GenerateReturnId(ispb string) string {
+	// Data/hora atual em UTC no formato yyyyMMddHHmm
+	now := time.Now().UTC()
+	timestamp := now.Format("200601021504")
+
+	// Sequencial único de 11 caracteres alfanuméricos
+	sequential := GenerateRandomAlphanumeric(11)
+
+	return fmt.Sprintf("%s%s%s%s", returnIdPrefix, ispb, timestamp, sequential)
 }
