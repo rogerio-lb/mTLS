@@ -8,11 +8,11 @@ import (
 )
 
 func ConfigureMTLS() *tls.Config {
-	caCert, _ := os.ReadFile("/home/roger/projects/lb/mTLS/certs/Cadeia_Oficial.p7b")
+	caCert, _ := os.ReadFile("D:\\LbCerts\\Cadeia_Oficial.p7b")
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
 
-	cert, _ := tls.LoadX509KeyPair("certs/certificado-25065760.cer", "certs/spb_hm_private_unencrypted.key")
+	cert, _ := tls.LoadX509KeyPair("D:\\LbCerts\\certificado-25065760.cer", "D:\\LbCerts\\spb_hm_private_unencrypted.key")
 
 	// Configure TLS
 	tlsConfig := &tls.Config{

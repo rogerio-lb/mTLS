@@ -59,7 +59,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>01181521</Id>
+                        <Id>00038166</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
@@ -89,8 +89,8 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <PmtId>
                     <EndToEndId>%s</EndToEndId>
                 </PmtId>
-                <IntrBkSttlmAmt Ccy="BRL">1000.00</IntrBkSttlmAmt>
-                <AccptncDtTm>2020-01-01T08:30:00.000Z</AccptncDtTm>
+                <IntrBkSttlmAmt Ccy="BRL">0.01</IntrBkSttlmAmt>
+                <AccptncDtTm>%s</AccptncDtTm>
                 <ChrgBr>SLEV</ChrgBr>
                 <MndtRltdInf>
                     <Tp>
@@ -123,14 +123,14 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <DbtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>10000000</MmbId>
+                            <MmbId>52833288</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </DbtrAgt>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>20000000</MmbId>
+                            <MmbId>18236120</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -138,7 +138,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>14811554744</Id>
+                                <Id>46444431000148</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -146,8 +146,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>00384912</Id>
-                            <Issr>0001</Issr>
+                            <Id>50537483225</Id> 
                         </Othr>
                     </Id>
                     <Tp>
@@ -181,7 +180,7 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>00038166</Id>
+                        <Id>18236120</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
@@ -368,7 +367,7 @@ var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 func callJavaFunction(message string) (string, error) {
 	// Run Java program with message as argument
-	cmd := exec.Command("java", "-jar", "java/signer.jar", "-a", message)
+	cmd := exec.Command("java", "-jar", "D:\\signer.jar", "-a", message)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("failed to run Java: %v", err)
@@ -389,7 +388,8 @@ func main() {
 
 	//returnId := GenerateReturnId("52833288")
 
-	ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID) //pacs008
+	ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+
 	//ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, endToEndID) //pacs004
 	//ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, endToEndID2) //pacs002
 	//ready := fmt.Sprintf(camt060, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060
