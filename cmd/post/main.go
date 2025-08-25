@@ -89,7 +89,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <PmtId>
                     <EndToEndId>%s</EndToEndId>
                 </PmtId>
-                <IntrBkSttlmAmt Ccy="BRL">0.01</IntrBkSttlmAmt>
+                <IntrBkSttlmAmt Ccy="BRL">1.00</IntrBkSttlmAmt>
                 <AccptncDtTm>%s</AccptncDtTm>
                 <ChrgBr>SLEV</ChrgBr>
                 <MndtRltdInf>
@@ -130,7 +130,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>18236120</MmbId>
+                            <MmbId>99999004</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -138,7 +138,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>46444431000148</Id>
+                                <Id>68163319000171</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -146,7 +146,8 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>50537483225</Id> 
+                            <Id>79396001</Id>
+                            <Issr>0001</Issr>
                         </Othr>
                     </Id>
                     <Tp>
@@ -157,7 +158,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Cd>IPAY</Cd>
                 </Purp>
                 <RmtInf>
-                    <Ustrd>Teste 1</Ustrd>
+                    <Ustrd>Teste 2</Ustrd>
                 </RmtInf>
             </CdtTrfTxInf>
         </FIToFICstmrCdtTrf>
@@ -180,7 +181,7 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>18236120</Id>
+                        <Id>00038166</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
@@ -203,7 +204,7 @@ var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </Document>
 </Envelope>`
 
-var camt060 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+var camt060_saldo_momento = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Envelope xmlns="https://www.bcb.gov.br/pi/camt.060/1.9">
     <AppHdr>
         <Fr>
@@ -241,7 +242,7 @@ var camt060 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Agt>
                         <FinInstnId>
                             <ClrSysMmbId>
-                                <MmbId>99999010</MmbId>
+                                <MmbId>52833288</MmbId>
                             </ClrSysMmbId>
                         </FinInstnId>
                     </Agt>
@@ -249,6 +250,125 @@ var camt060 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <ReqdBalTp>
                     <CdOrPrtry>
                         <Prtry>CSA</Prtry>
+                    </CdOrPrtry>
+                </ReqdBalTp>
+            </RptgReq>
+        </AcctRptgReq>
+    </Document>
+</Envelope>`
+
+var camt060_saldo_data_anterior = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/camt.060/1.9">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>camt.060.spi.1.9</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <AcctRptgReq>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+            </GrpHdr>
+            <RptgReq>
+                <ReqdMsgNmId>camt.053</ReqdMsgNmId>
+                <AcctOwnr>
+                    <Agt>
+                        <FinInstnId>
+                            <ClrSysMmbId>
+                                <MmbId>52833288</MmbId>
+                            </ClrSysMmbId>
+                        </FinInstnId>
+                    </Agt>
+                </AcctOwnr>
+                <RptgPrd>
+                    <FrToDt>
+                        <FrDt>2025-08-20</FrDt>
+                    </FrToDt>
+                    <Tp>ALLL</Tp>
+                </RptgPrd>
+                <ReqdBalTp>
+                    <CdOrPrtry>
+                        <Prtry>CSA</Prtry>
+                    </CdOrPrtry>
+                </ReqdBalTp>
+            </RptgReq>
+            </RptgReq>
+        </AcctRptgReq>
+    </Document>
+</Envelope>`
+
+var camt060_arquivo_trd = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/camt.060/1.9">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>camt.060.spi.1.9</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <AcctRptgReq>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+            </GrpHdr>
+            <RptgReq>
+                <ReqdMsgNmId>camt.052</ReqdMsgNmId>
+                <AcctOwnr>
+                    <Agt>
+                        <FinInstnId>
+                            <ClrSysMmbId>
+                                <MmbId>52833288</MmbId>
+                            </ClrSysMmbId>
+                        </FinInstnId>
+                    </Agt>
+                </AcctOwnr>
+                <RptgPrd>
+                    <FrToDt>
+                        <FrDt>2025-08-20</FrDt>
+                    </FrToDt>
+                    <Tp>ALLL</Tp>
+                </RptgPrd>
+                <ReqdBalTp>
+                    <CdOrPrtry>
+                        <Prtry>TRD</Prtry>
                     </CdOrPrtry>
                 </ReqdBalTp>
             </RptgReq>
@@ -367,7 +487,7 @@ var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 func callJavaFunction(message string) (string, error) {
 	// Run Java program with message as argument
-	cmd := exec.Command("java", "-jar", "D:\\signer.jar", "-a", message)
+	cmd := exec.Command("java", "-jar", "/home/roger/projects/lb/signer-java/target/signer-java-1.0-SNAPSHOT.jar", "-a", message)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("failed to run Java: %v", err)
@@ -379,20 +499,22 @@ func callJavaFunction(message string) (string, error) {
 }
 
 func main() {
-	now := getCurrentTime().UTC()
+	//now := getCurrentTime().UTC()
 
-	endToEndID, _ := GenerateEndToEndId("52833288", now)
+	//endToEndID, _ := GenerateEndToEndId("52833288", now)
 	//endToEndID2, _ := GenerateEndToEndId("00038166", now)
 
-	id, _ := GenerateMsgId("52833288")
+	//id, _ := GenerateMsgId("52833288")
 
 	//returnId := GenerateReturnId("52833288")
 
-	ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+	//ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
 
 	//ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, endToEndID) //pacs004
 	//ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, endToEndID2) //pacs002
-	//ready := fmt.Sprintf(camt060, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060
+	//ready := fmt.Sprintf(camt060_saldo_momento, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_saldo_momento
+	//ready := fmt.Sprintf(camt060_saldo_data_anterior, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_saldo_data_anterior
+	//ready := fmt.Sprintf(camt060_arquivo_trd, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_arquivo_trd
 
 	conn := services.CreateConnection()
 
@@ -400,7 +522,8 @@ func main() {
 		panic("Failed to create TLS connection")
 	}
 
-	str, err := callJavaFunction(ready)
+	//str, err := callJavaFunction(ready)
+	str, err := callJavaFunction(pibr001)
 
 	fmt.Printf("Generated PACS.008 message:\n%s\n", str)
 
