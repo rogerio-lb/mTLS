@@ -639,18 +639,3 @@ func compressContentToGzip(body []byte, buffer *bytes.Buffer) error {
 
 	return nil
 }
-
-func decompressContentFromGzip(body []byte) ([]byte, error) {
-	gzipReader, err := gzip.NewReader(bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
-	defer gzipReader.Close()
-
-	decompressedBody, err := io.ReadAll(gzipReader)
-	if err != nil {
-		return nil, err
-	}
-
-	return decompressedBody, nil
-}

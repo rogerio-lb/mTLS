@@ -2,6 +2,8 @@ package services
 
 import (
 	"bufio"
+	"bytes"
+	"compress/gzip"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -72,6 +74,8 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 	request := "GET " + pullnext + " HTTP/1.2\r\n" +
 		"Host: icom-h.pi.rsfn.net.br\r\n" +
 		//"Accept: multipart/mixed\r\n" +
+		"Accept: application/xml\r\n" +
+		"Accept-Encoding: gzip\r\n" +
 		"User-Agent: Go-http-client/1.2\r\n" +
 		"Connection: Close\r\n\r\n"
 
@@ -95,15 +99,25 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 		return nil, err
 	}
 
+	var decompressedMessage []byte
+
+	if resp.StatusCode == http.StatusOK {
+		decompressedMessage, err = decompressContentFromGzip(body)
+		if err != nil {
+			fmt.Printf("Failed to decompress body: %v\n", err)
+			return nil, err
+		}
+	}
+
 	fmt.Printf("Status: %s\n", resp.Status)
 	fmt.Printf("Body received (%d bytes)\n", len(body))
-	fmt.Printf("Body: %s\n", body)
+	fmt.Printf("Body: %s\n", decompressedMessage)
 	fmt.Printf("Headers: %v\n", resp.Header)
 
 	fmt.Println("Stream started successfully.")
 
 	return &GetMessageResponse{
-		Message:    string(body),
+		Message:    string(decompressedMessage),
 		PIPullNext: resp.Header.Get("PI-Pull-Next"),
 		resourceID: resp.Header.Get("Pi-Resourceid"),
 	}, nil
@@ -178,4 +192,19 @@ func PostMessage(conn *tls.Conn, content string) error {
 
 	fmt.Printf("Status: %s\n", resp.Status)
 	return nil
+}
+
+func decompressContentFromGzip(body []byte) ([]byte, error) {
+	gzipReader, err := gzip.NewReader(bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	defer gzipReader.Close()
+
+	decompressedBody, err := io.ReadAll(gzipReader)
+	if err != nil {
+		return nil, err
+	}
+
+	return decompressedBody, nil
 }
