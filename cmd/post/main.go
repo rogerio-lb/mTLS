@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
@@ -130,7 +132,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>99999004</MmbId>
+                            <MmbId>71027866</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -138,7 +140,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>68163319000171</Id>
+                                <Id>61363314000143</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -146,7 +148,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>79396001</Id>
+                            <Id>90570189</Id>
                             <Issr>0001</Issr>
                         </Othr>
                     </Id>
@@ -158,7 +160,7 @@ var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Cd>IPAY</Cd>
                 </Purp>
                 <RmtInf>
-                    <Ustrd>Teste 2</Ustrd>
+                    <Ustrd>Teste 1</Ustrd>
                 </RmtInf>
             </CdtTrfTxInf>
         </FIToFICstmrCdtTrf>
@@ -532,7 +534,18 @@ func main() {
 		return
 	}
 
-	err = services.PostMessage(conn, str)
+	var compressedMessage bytes.Buffer
+
+	err = compressContentToGzip([]byte(str), &compressedMessage)
+
+	if err != nil {
+		fmt.Println("Error compressing message:", err)
+		return
+	}
+
+	onlyBytes := compressedMessage.Bytes()
+
+	err = services.PostMessage(conn, string(onlyBytes))
 
 	if err != nil {
 		fmt.Println("Error posting message:", err)
@@ -610,4 +623,34 @@ func GenerateReturnId(ispb string) string {
 	sequential := GenerateRandomAlphanumeric(11)
 
 	return fmt.Sprintf("%s%s%s%s", returnIdPrefix, ispb, timestamp, sequential)
+}
+
+func compressContentToGzip(body []byte, buffer *bytes.Buffer) error {
+	gzipWriter := gzip.NewWriter(buffer)
+	defer gzipWriter.Close()
+
+	if _, err := gzipWriter.Write(body); err != nil {
+		return err
+	}
+
+	if err := gzipWriter.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func decompressContentFromGzip(body []byte) ([]byte, error) {
+	gzipReader, err := gzip.NewReader(bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	defer gzipReader.Close()
+
+	decompressedBody, err := io.ReadAll(gzipReader)
+	if err != nil {
+		return nil, err
+	}
+
+	return decompressedBody, nil
 }
