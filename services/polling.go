@@ -7,8 +7,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type GetMessageResponse struct {
@@ -68,6 +70,16 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 			fmt.Printf("Failed to decompress body: %v\n", err)
 			return nil, err
 		}
+
+		contentType := resp.Header.Get("Content-Type")
+		boundary := contentType[strings.Index(contentType, ";")+1:]
+		boundary = strings.TrimSpace(boundary)
+		boundary = strings.TrimPrefix(boundary, "boundary=")
+
+		err = parseMultipartFromString(string(decompressedMessage), boundary)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	fmt.Printf("Status: %s\n", resp.Status)
@@ -122,19 +134,34 @@ func FinishStream(conn *tls.Conn, pullNext string) error {
 	return nil
 }
 
-func PostMessage(conn *tls.Conn, content string) error {
+func PostMessage(conn *tls.Conn, content string, boundary string) error {
 	fmt.Println("Sending message...")
 
 	contentLength := len(content)
 
-	request := "POST /api/v1/in/52833288/msgs HTTP/1.2\r\n" +
-		"Host: icom-h.pi.rsfn.net.br\r\n" +
-		"Content-Type: application/xml; charset=utf-8\r\n" +
-		"Content-Encoding: gzip\r\n" +
-		"Content-Length: " + strconv.Itoa(contentLength) + "\r\n" +
-		"User-Agent: Go-http-client/1.1\r\n" +
-		"Connection: close\r\n\r\n" +
-		content
+	var request string
+
+	if boundary != "" {
+		request = "POST /api/v1/in/52833288/msgs HTTP/1.1\r\n" +
+			"Host: icom-h.pi.rsfn.net.br\r\n" +
+			"Content-Type: multipart/mixed; boundary=" + boundary + "\r\n" +
+			//"Content-Encoding: gzip\r\n" +
+			//"Transfer-Encoding: chunked" + "\r\n" +
+			"Content-Length: " + strconv.Itoa(contentLength) + "\r\n" +
+			//"User-Agent: Go-http-client/1.1\r\n" +
+			//"Connection: close\r\n" +
+			"\r\n" +
+			content
+	} else {
+		request = "POST /api/v1/in/52833288/msgs HTTP/1.2\r\n" +
+			"Host: icom-h.pi.rsfn.net.br\r\n" +
+			"Content-Type: application/xml; charset=utf-8\r\n" +
+			//"Content-Encoding: gzip\r\n" +
+			"Content-Length: " + strconv.Itoa(contentLength) + "\r\n" +
+			"User-Agent: Go-http-client/1.1\r\n" +
+			"Connection: close\r\n\r\n" +
+			content
+	}
 
 	_, err := conn.Write([]byte(request))
 	if err != nil {
@@ -152,6 +179,12 @@ func PostMessage(conn *tls.Conn, content string) error {
 	defer resp.Body.Close()
 
 	fmt.Printf("Status: %s\n", resp.Status)
+	fmt.Printf("Headers: %v\n", resp.Header)
+
+	responseBody, _ := io.ReadAll(resp.Body)
+
+	fmt.Printf("Body: %s\n", responseBody)
+
 	return nil
 }
 
@@ -168,4 +201,32 @@ func decompressContentFromGzip(body []byte) ([]byte, error) {
 	}
 
 	return decompressedBody, nil
+}
+
+func parseMultipartFromString(responseBody string, boundary string) error {
+	reader := multipart.NewReader(strings.NewReader(responseBody), boundary)
+
+	for {
+		part, err := reader.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("failed to read multipart: %v", err)
+		}
+
+		/*contentType := part.Header.Get("Content-Type")
+		if strings.Contains(contentType, "application/xml") {
+			xmlData, err := io.ReadAll(part)
+			if err != nil {
+				return fmt.Errorf("failed to read XML part: %v", err)
+			}
+
+			fmt.Printf("XML Part: %s\n", xmlData)
+		}*/
+
+		part.Close()
+	}
+
+	return nil
 }

@@ -9,6 +9,7 @@ import (
 	"io"
 	"mTLS/services"
 	ramdom "math/rand"
+	"mime/multipart"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -30,20 +31,12 @@ const (
 )
 
 var (
-	// pacsRandReader is used to make testing easier by allowing us to replace the random source
-	pacsRandReader io.Reader = rand.Reader
-
-	// numericPattern validates that a string contains only digits
-	numericPattern = regexp.MustCompile(`^[0-9]{8}$`)
-
-	// alphanumericPattern validates that a string contains only alphanumeric characters
-	alphanumericPattern = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
-
-	// getCurrentTime is used to make testing easier by allowing us to replace the current time
-	getCurrentTime = time.Now
+	pacsRandReader      io.Reader = rand.Reader
+	numericPattern                = regexp.MustCompile(`^[0-9]{8}$`)
+	alphanumericPattern           = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+	getCurrentTime                = time.Now
+	randReader          io.Reader = rand.Reader
 )
-
-var randReader io.Reader = rand.Reader
 
 var pacs008 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Envelope xmlns="https://www.bcb.gov.br/pi/pacs.008/1.13">
@@ -495,18 +488,68 @@ func callJavaFunction(message string) (string, error) {
 		return "", fmt.Errorf("failed to run Java: %v", err)
 	}
 
-	fmt.Print(string(output))
-
 	return string(output), nil
 }
 
 func main() {
-	//now := getCurrentTime().UTC()
+	conn := services.CreateConnection()
 
-	//endToEndID, _ := GenerateEndToEndId("52833288", now)
-	//endToEndID2, _ := GenerateEndToEndId("00038166", now)
+	if conn == nil {
+		panic("Failed to create TLS connection")
+	}
 
-	//id, _ := GenerateMsgId("52833288")
+	var responseContent bytes.Buffer
+
+	mw := multipart.NewWriter(&responseContent)
+
+	for i := 0; i < 10; i++ {
+		message := CreateMessage()
+		err := addXMLPart(mw, message)
+
+		if err != nil {
+			fmt.Println("Error adding XML part:", err)
+			continue
+		}
+	}
+
+	mw.Close()
+
+	var compressedMessage bytes.Buffer
+
+	err := compressContentToGzip(responseContent.Bytes(), &compressedMessage)
+	if err != nil {
+		fmt.Println("Error compressing message:", err)
+		return
+	}
+
+	//err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
+	err = services.PostMessage(conn, string(responseContent.Bytes()), mw.Boundary())
+	//err = services.PostMessage(conn, message, "")
+	if err != nil {
+		fmt.Println("Error posting message:", err)
+	}
+}
+
+func addXMLPart(mw *multipart.Writer, content string) error {
+	part, err := mw.CreatePart(map[string][]string{
+		"Content-Type": {"application/xml; charset=utf-8"},
+	})
+	if err != nil {
+		return err
+	}
+	_, err = part.Write([]byte(content))
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateMessage() string {
+	/*now := getCurrentTime().UTC()
+	endToEndID, _ := GenerateEndToEndId("52833288", now)
+	id, _ := GenerateMsgId("52833288")*/
 
 	//returnId := GenerateReturnId("52833288")
 
@@ -518,23 +561,14 @@ func main() {
 	//ready := fmt.Sprintf(camt060_saldo_data_anterior, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_saldo_data_anterior
 	//ready := fmt.Sprintf(camt060_arquivo_trd, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_arquivo_trd
 
-	conn := services.CreateConnection()
-
-	if conn == nil {
-		panic("Failed to create TLS connection")
-	}
-
 	//str, err := callJavaFunction(ready)
 	str, err := callJavaFunction(pibr001)
-
-	fmt.Printf("Generated PACS.008 message:\n%s\n", str)
-
 	if err != nil {
 		fmt.Println("Error calling Java function:", err)
-		return
+		return ""
 	}
 
-	var compressedMessage bytes.Buffer
+	/*var compressedMessage bytes.Buffer
 
 	err = compressContentToGzip([]byte(str), &compressedMessage)
 
@@ -549,7 +583,9 @@ func main() {
 
 	if err != nil {
 		fmt.Println("Error posting message:", err)
-	}
+	}*/
+
+	return str
 }
 
 func GenerateMsgId(ispb string) (string, error) {
