@@ -145,18 +145,16 @@ func PostMessage(conn *tls.Conn, content string, boundary string) error {
 		request = "POST /api/v1/in/52833288/msgs HTTP/1.1\r\n" +
 			"Host: icom-h.pi.rsfn.net.br\r\n" +
 			"Content-Type: multipart/mixed; boundary=" + boundary + "\r\n" +
-			//"Content-Encoding: gzip\r\n" +
-			//"Transfer-Encoding: chunked" + "\r\n" +
+			"Content-Encoding: gzip\r\n" +
 			"Content-Length: " + strconv.Itoa(contentLength) + "\r\n" +
-			//"User-Agent: Go-http-client/1.1\r\n" +
-			//"Connection: close\r\n" +
+			"User-Agent: Go-http-client/1.1\r\n" +
 			"\r\n" +
 			content
 	} else {
 		request = "POST /api/v1/in/52833288/msgs HTTP/1.2\r\n" +
 			"Host: icom-h.pi.rsfn.net.br\r\n" +
 			"Content-Type: application/xml; charset=utf-8\r\n" +
-			//"Content-Encoding: gzip\r\n" +
+			"Content-Encoding: gzip\r\n" +
 			"Content-Length: " + strconv.Itoa(contentLength) + "\r\n" +
 			"User-Agent: Go-http-client/1.1\r\n" +
 			"Connection: close\r\n\r\n" +

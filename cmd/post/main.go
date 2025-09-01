@@ -502,7 +502,7 @@ func main() {
 
 	mw := multipart.NewWriter(&responseContent)
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 2; i++ {
 		message := CreateMessage()
 		err := addXMLPart(mw, message)
 
@@ -522,8 +522,8 @@ func main() {
 		return
 	}
 
-	//err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
-	err = services.PostMessage(conn, string(responseContent.Bytes()), mw.Boundary())
+	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
+	//err = services.PostMessage(conn, string(responseContent.Bytes()), mw.Boundary())
 	//err = services.PostMessage(conn, message, "")
 	if err != nil {
 		fmt.Println("Error posting message:", err)
