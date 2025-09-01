@@ -568,23 +568,6 @@ func CreateMessage() string {
 		return ""
 	}
 
-	/*var compressedMessage bytes.Buffer
-
-	err = compressContentToGzip([]byte(str), &compressedMessage)
-
-	if err != nil {
-		fmt.Println("Error compressing message:", err)
-		return
-	}
-
-	onlyBytes := compressedMessage.Bytes()
-
-	err = services.PostMessage(conn, string(onlyBytes))
-
-	if err != nil {
-		fmt.Println("Error posting message:", err)
-	}*/
-
 	return str
 }
 

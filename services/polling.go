@@ -157,7 +157,8 @@ func PostMessage(conn *tls.Conn, content string, boundary string) error {
 			"Content-Encoding: gzip\r\n" +
 			"Content-Length: " + strconv.Itoa(contentLength) + "\r\n" +
 			"User-Agent: Go-http-client/1.1\r\n" +
-			"Connection: close\r\n\r\n" +
+			"Connection: close\r\n" +
+			"\r\n" +
 			content
 	}
 
