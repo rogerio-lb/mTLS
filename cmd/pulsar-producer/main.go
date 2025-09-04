@@ -38,13 +38,14 @@ var (
 	randReader          io.Reader = rand.Reader
 )
 
-var message = `<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.14">
+var pibr001 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/pibr.001/1.3">
     <AppHdr>
         <Fr>
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>00038166</Id>
+                        <Id>52833288</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
@@ -53,34 +54,26 @@ var message = `<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.14">
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>52833288</Id>
+                        <Id>00038166</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
         </To>
-        <BizMsgIdr>M5283328820250829144521906IxC8GD</BizMsgIdr>
-        <MsgDefIdr>pacs.002.spi.1.14</MsgDefIdr>
-        <CreDt>2025-08-29T14:45:21.906Z</CreDt>
+        <BizMsgIdr>M52833288bfefffd6533b49708ba8101</BizMsgIdr>
+        <MsgDefIdr>pibr.001.spi.1.3</MsgDefIdr>
+        <CreDt>2020-04-07T13:47:22.580Z</CreDt>
         <Sgntr/>
     </AppHdr>
     <Document>
-        <FIToFIPmtStsRpt>
+        <EchoReq>
             <GrpHdr>
-                <MsgId>M5283328820250829144521906IxC8GD</MsgId>
-                <CreDtTm>2025-08-29T14:45:21.906Z</CreDtTm>
+                <MsgId>M52833288bfefffd6533b49708ba8101</MsgId>
+                <CreDtTm>2020-04-07T13:47:22.580Z</CreDtTm>
             </GrpHdr>
-            <TxInfAndSts>
-                <OrgnlInstrId>E71027866202508272059568098cbddQ</OrgnlInstrId>
-                <OrgnlEndToEndId>E71027866202508272059568098cbddQ</OrgnlEndToEndId>
-                <TxSts>ACSP</TxSts>
-                <FctvIntrBkSttlmDt>
-                    <DtTm>2025-08-29T14:45:21.906Z</DtTm>
-                </FctvIntrBkSttlmDt>
-                <OrgnlTxRef>
-                    <IntrBkSttlmDt>2025-08-29</IntrBkSttlmDt>
-                </OrgnlTxRef>
-            </TxInfAndSts>
-        </FIToFIPmtStsRpt>
+            <EchoTxInf>
+                <Data>Campo livre</Data>
+            </EchoTxInf>
+        </EchoReq>
     </Document>
 </Envelope>`
 
@@ -139,8 +132,9 @@ var pacs002 = `<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.14">
 func main() {
 	// Create Pulsar client with SSL
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL:            "pulsar+ssl://pc-a5bec094.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud",
-		Authentication: pulsar.NewAuthenticationToken("eyJhbGciOiJSUzI1NiIsImtpZCI6IjE0NjNhODQ5LTNkNzUtNTlmMi1hMTgyLTVjNzE0ODY4YjBhMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXJuOnNuOnB1bHNhcjpvLWU1NWNwOmxiLXBheSJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby9zY29wZSI6WyJhZG1pbiIsImFjY2VzcyJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby91c2VybmFtZSI6ImxiLXN0Z0BvLWU1NWNwLmF1dGguc3RyZWFtbmF0aXZlLmNsb3VkIiwiaWF0IjoxNzUzMTMxMTcxLCJpc3MiOiJodHRwczovL3BjLWE1YmVjMDk0LmF3cy11c2UyLXByb2R1Y3Rpb24tc25jaS1wb29sLWtpZC5zdHJlYW1uYXRpdmUuYXdzLnNuaW8uY2xvdWQvYXBpa2V5cy8iLCJqdGkiOiJhYTk3YTVhN2YwNzA0N2FjYTI3MzQ4ODdlOTI1ZDMyMyIsInBlcm1pc3Npb25zIjpbXSwic3ViIjoiVWNDbGVyaENVRFh6S1NUZ21WbHFPVkF5b1R0aDlUT1lAY2xpZW50cyJ9.UfLKDZNusPHya-xgdWHoSNXbp6nhBMaEyizzULkWCsriY4VKdfkJ6OqnrPXP9xOi0aVKzCL-9ObgzxBklKoFObguZJ1MrIgzeiQfp0FUfmylwWz_jb-zbPZ5cbclvrbMXojKJte1lk9GxmmggBf-zUpuRGDiVGV42ZnU2AVJ-1PXx5frQ5SUbfJkfIRDp566b6PoF9r80gYc594CCo_Z0nUUMjHR_1molD5BDBYoK3O71yy-kEf-_J_nOdfMBQdHZbQGitpo5BzLvE-kdpHg0JZ392IZPeWhoZCEyGfLaNp6aNi8tyCMe--NQFm78h6bQ4L3VHge7BVR7dOjMRiBQQ"),
+		URL: "pulsar://localhost:6650",
+		//URL:            "pulsar+ssl://pc-a5bec094.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud",
+		//Authentication: pulsar.NewAuthenticationToken("eyJhbGciOiJSUzI1NiIsImtpZCI6IjE0NjNhODQ5LTNkNzUtNTlmMi1hMTgyLTVjNzE0ODY4YjBhMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXJuOnNuOnB1bHNhcjpvLWU1NWNwOmxiLXBheSJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby9zY29wZSI6WyJhZG1pbiIsImFjY2VzcyJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby91c2VybmFtZSI6ImxiLXN0Z0BvLWU1NWNwLmF1dGguc3RyZWFtbmF0aXZlLmNsb3VkIiwiaWF0IjoxNzUzMTMxMTcxLCJpc3MiOiJodHRwczovL3BjLWE1YmVjMDk0LmF3cy11c2UyLXByb2R1Y3Rpb24tc25jaS1wb29sLWtpZC5zdHJlYW1uYXRpdmUuYXdzLnNuaW8uY2xvdWQvYXBpa2V5cy8iLCJqdGkiOiJhYTk3YTVhN2YwNzA0N2FjYTI3MzQ4ODdlOTI1ZDMyMyIsInBlcm1pc3Npb25zIjpbXSwic3ViIjoiVWNDbGVyaENVRFh6S1NUZ21WbHFPVkF5b1R0aDlUT1lAY2xpZW50cyJ9.UfLKDZNusPHya-xgdWHoSNXbp6nhBMaEyizzULkWCsriY4VKdfkJ6OqnrPXP9xOi0aVKzCL-9ObgzxBklKoFObguZJ1MrIgzeiQfp0FUfmylwWz_jb-zbPZ5cbclvrbMXojKJte1lk9GxmmggBf-zUpuRGDiVGV42ZnU2AVJ-1PXx5frQ5SUbfJkfIRDp566b6PoF9r80gYc594CCo_Z0nUUMjHR_1molD5BDBYoK3O71yy-kEf-_J_nOdfMBQdHZbQGitpo5BzLvE-kdpHg0JZ392IZPeWhoZCEyGfLaNp6aNi8tyCMe--NQFm78h6bQ4L3VHge7BVR7dOjMRiBQQ"),
 	})
 	if err != nil {
 		log.Fatalf("Could not instantiate Pulsar client: %v", err)
@@ -149,7 +143,7 @@ func main() {
 
 	// Create producer
 	producer, err := client.CreateProducer(pulsar.ProducerOptions{
-		Topic:                   "persistent://lb-core/spi/bridge-to-psti-topic-partition-0",
+		Topic:                   "persistent://lb-core/spi/psti-to-bridge-topic-partition-0",
 		Name:                    "my-producer",
 		SendTimeout:             10 * time.Second,
 		DisableBatching:         false,
@@ -161,22 +155,17 @@ func main() {
 	}
 	defer producer.Close()
 
-	/*now := getCurrentTime().UTC()
-
-	endToEndID, _ := GenerateEndToEndId("52833288", now)
-
-	id, _ := GenerateMsgId("52833288")
-
-	ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
-
-	m, _ := callJavaFunction(ready)*/
-
 	// Send messages
 	ctx := context.Background()
 
-	for i := 0; i < 1; i++ {
+	str, err := callJavaFunction(pibr001)
+	if err != nil {
+		panic("failed to call Java function: " + err.Error())
+	}
+
+	for i := 0; i < 2; i++ {
 		message := &pulsar.ProducerMessage{
-			Payload: []byte(pacs002),
+			Payload: []byte(str),
 			Key:     "message-key-" + string(rune(i+'0')),
 			Properties: map[string]string{
 				"timestamp": time.Now().Format(time.RFC3339),
@@ -191,7 +180,7 @@ func main() {
 		}
 
 		log.Printf("Successfully sent message %d with ID: %s", i, messageID)
-		time.Sleep(1 * time.Second)
+		//time.Sleep(1 * time.Second)
 	}
 
 	log.Println("All messages sent successfully!")
