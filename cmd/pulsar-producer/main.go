@@ -132,9 +132,9 @@ var pacs002 = `<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.14">
 func main() {
 	// Create Pulsar client with SSL
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: "pulsar://localhost:6650",
-		//URL:            "pulsar+ssl://pc-a5bec094.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud",
-		//Authentication: pulsar.NewAuthenticationToken("eyJhbGciOiJSUzI1NiIsImtpZCI6IjE0NjNhODQ5LTNkNzUtNTlmMi1hMTgyLTVjNzE0ODY4YjBhMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXJuOnNuOnB1bHNhcjpvLWU1NWNwOmxiLXBheSJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby9zY29wZSI6WyJhZG1pbiIsImFjY2VzcyJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby91c2VybmFtZSI6ImxiLXN0Z0BvLWU1NWNwLmF1dGguc3RyZWFtbmF0aXZlLmNsb3VkIiwiaWF0IjoxNzUzMTMxMTcxLCJpc3MiOiJodHRwczovL3BjLWE1YmVjMDk0LmF3cy11c2UyLXByb2R1Y3Rpb24tc25jaS1wb29sLWtpZC5zdHJlYW1uYXRpdmUuYXdzLnNuaW8uY2xvdWQvYXBpa2V5cy8iLCJqdGkiOiJhYTk3YTVhN2YwNzA0N2FjYTI3MzQ4ODdlOTI1ZDMyMyIsInBlcm1pc3Npb25zIjpbXSwic3ViIjoiVWNDbGVyaENVRFh6S1NUZ21WbHFPVkF5b1R0aDlUT1lAY2xpZW50cyJ9.UfLKDZNusPHya-xgdWHoSNXbp6nhBMaEyizzULkWCsriY4VKdfkJ6OqnrPXP9xOi0aVKzCL-9ObgzxBklKoFObguZJ1MrIgzeiQfp0FUfmylwWz_jb-zbPZ5cbclvrbMXojKJte1lk9GxmmggBf-zUpuRGDiVGV42ZnU2AVJ-1PXx5frQ5SUbfJkfIRDp566b6PoF9r80gYc594CCo_Z0nUUMjHR_1molD5BDBYoK3O71yy-kEf-_J_nOdfMBQdHZbQGitpo5BzLvE-kdpHg0JZ392IZPeWhoZCEyGfLaNp6aNi8tyCMe--NQFm78h6bQ4L3VHge7BVR7dOjMRiBQQ"),
+		//URL: "pulsar://localhost:6650",
+		URL:            "pulsar+ssl://pc-a5bec094.aws-use2-production-snci-pool-kid.streamnative.aws.snio.cloud",
+		Authentication: pulsar.NewAuthenticationToken("eyJhbGciOiJSUzI1NiIsImtpZCI6IjE0NjNhODQ5LTNkNzUtNTlmMi1hMTgyLTVjNzE0ODY4YjBhMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXJuOnNuOnB1bHNhcjpvLWU1NWNwOmxiLXBheSJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby9zY29wZSI6WyJhZG1pbiIsImFjY2VzcyJdLCJodHRwczovL3N0cmVhbW5hdGl2ZS5pby91c2VybmFtZSI6ImxiLXN0Z0BvLWU1NWNwLmF1dGguc3RyZWFtbmF0aXZlLmNsb3VkIiwiaWF0IjoxNzUzMTMxMTcxLCJpc3MiOiJodHRwczovL3BjLWE1YmVjMDk0LmF3cy11c2UyLXByb2R1Y3Rpb24tc25jaS1wb29sLWtpZC5zdHJlYW1uYXRpdmUuYXdzLnNuaW8uY2xvdWQvYXBpa2V5cy8iLCJqdGkiOiJhYTk3YTVhN2YwNzA0N2FjYTI3MzQ4ODdlOTI1ZDMyMyIsInBlcm1pc3Npb25zIjpbXSwic3ViIjoiVWNDbGVyaENVRFh6S1NUZ21WbHFPVkF5b1R0aDlUT1lAY2xpZW50cyJ9.UfLKDZNusPHya-xgdWHoSNXbp6nhBMaEyizzULkWCsriY4VKdfkJ6OqnrPXP9xOi0aVKzCL-9ObgzxBklKoFObguZJ1MrIgzeiQfp0FUfmylwWz_jb-zbPZ5cbclvrbMXojKJte1lk9GxmmggBf-zUpuRGDiVGV42ZnU2AVJ-1PXx5frQ5SUbfJkfIRDp566b6PoF9r80gYc594CCo_Z0nUUMjHR_1molD5BDBYoK3O71yy-kEf-_J_nOdfMBQdHZbQGitpo5BzLvE-kdpHg0JZ392IZPeWhoZCEyGfLaNp6aNi8tyCMe--NQFm78h6bQ4L3VHge7BVR7dOjMRiBQQ"),
 	})
 	if err != nil {
 		log.Fatalf("Could not instantiate Pulsar client: %v", err)
@@ -143,17 +143,20 @@ func main() {
 
 	// Create producer
 	producer, err := client.CreateProducer(pulsar.ProducerOptions{
-		Topic:                   "persistent://lb-core/spi/psti-to-bridge-topic-partition-0",
+		Topic:                   "persistent://lb-core/spi/psti-to-bridge-topic",
 		Name:                    "my-producer",
 		SendTimeout:             10 * time.Second,
 		DisableBatching:         false,
-		BatchingMaxPublishDelay: 100 * time.Millisecond,
+		BatchingMaxPublishDelay: 200 * time.Millisecond,
 		BatchingMaxMessages:     1000,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create producer: %v", err)
 	}
-	defer producer.Close()
+	//defer producer.Close()
+
+	done := make(chan bool)
+	messageChan := make(chan pulsar.ProducerMessage)
 
 	// Send messages
 	ctx := context.Background()
@@ -163,27 +166,51 @@ func main() {
 		panic("failed to call Java function: " + err.Error())
 	}
 
-	for i := 0; i < 2; i++ {
-		message := &pulsar.ProducerMessage{
-			Payload: []byte(str),
-			Key:     "message-key-" + string(rune(i+'0')),
-			Properties: map[string]string{
-				"timestamp": time.Now().Format(time.RFC3339),
-				"sender":    "go-producer",
-			},
-		}
+	counter := 0
+
+	select {
+	case <-done:
+		producer.Close()
+	case <-ctx.Done():
+		producer.Close()
+	case <-messageChan:
+		go func(m pulsar.ProducerMessage) {
+			messageID, err := producer.Send(ctx, &m)
+			if err != nil {
+				log.Printf("Failed to send message %d: %v", counter, err)
+			} else {
+				log.Printf("Successfully sent message %d with ID: %s", counter, messageID)
+			}
+		}(<-messageChan)
+	}
+
+	/*go func(count int) {
+
 
 		messageID, err := producer.Send(ctx, message)
 		if err != nil {
-			log.Printf("Failed to send message %d: %v", i, err)
-			continue
+			log.Printf("Failed to send message %d: %v", count, err)
 		}
 
-		log.Printf("Successfully sent message %d with ID: %s", i, messageID)
-		//time.Sleep(1 * time.Second)
-	}
+		log.Printf("Successfully sent message %d with ID: %s", count, messageID)
+	}(counter)*/
 
-	log.Println("All messages sent successfully!")
+	go func() {
+		for i := 0; i < 12000; i++ {
+			message := pulsar.ProducerMessage{
+				Payload: []byte(str),
+				Key:     "message-key-" + string(rune(counter+'0')),
+				Properties: map[string]string{
+					"timestamp": time.Now().Format(time.RFC3339),
+					"sender":    "go-producer",
+				},
+			}
+
+			messageChan <- message
+		}
+	}()
+
+	done <- true
 }
 
 func callJavaFunction(message string) (string, error) {

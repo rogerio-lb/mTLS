@@ -35,6 +35,7 @@ func CreateConnection() *tls.Conn {
 	conn, err := tls.Dial("tcp", "127.0.0.1:16522", tlsConfig)
 	if err != nil {
 		fmt.Printf("TLS connection failed: %v\n", err)
+		panic(fmt.Sprintf("Error MTLS: %v", err))
 		return nil
 	}
 
