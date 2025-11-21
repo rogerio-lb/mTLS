@@ -36,8 +36,8 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 
 	request := "GET " + pullnext + " HTTP/1.2\r\n" +
 		"Host: icom-h.pi.rsfn.net.br\r\n" +
-		"Accept: multipart/mixed\r\n" +
-		//"Accept: application/xml\r\n" +
+		//"Accept: multipart/mixed\r\n" +
+		"Accept: application/xml\r\n" +
 		"Accept-Encoding: gzip\r\n" +
 		"User-Agent: Go-http-client/1.2\r\n" +
 		"Connection: Close\r\n\r\n"
@@ -76,10 +76,10 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 		boundary = strings.TrimSpace(boundary)
 		boundary = strings.TrimPrefix(boundary, "boundary=")
 
-		err = parseMultipartFromString(string(decompressedMessage), boundary)
+		/*err = parseMultipartFromString(string(decompressedMessage), boundary)
 		if err != nil {
 			return nil, err
-		}
+		}*/
 	}
 
 	fmt.Printf("Status: %s\n", resp.Status)
