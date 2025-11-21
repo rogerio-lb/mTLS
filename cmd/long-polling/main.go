@@ -15,15 +15,17 @@ type Envelope struct {
 }
 
 type Document struct {
-	Transfer Transfer `xml:"FIToFICstmrCdtTrf"`
+	TransferPacs008 Transfer `xml:"FIToFICstmrCdtTrf"`
+	TransferPacs004 Transfer `xml:"PmtRtr"`
 }
 
 type Transfer struct {
-	Amount     Amount `xml:"CdtTrfTxInf>IntrBkSttlmAmt"`
-	EndToEndId string `xml:"CdtTrfTxInf>PmtId>EndToEndId"`
-	DebtorName string `xml:"CdtTrfTxInf>Dbtr>Nm"`
+	Amount             Amount `xml:"CdtTrfTxInf>IntrBkSttlmAmt"`
+	EndToEndId         string `xml:"CdtTrfTxInf>PmtId>EndToEndId"`
+	DebtorName         string `xml:"CdtTrfTxInf>Dbtr>Nm"`
+	ReturnID           string `xml:"TxInf>RtrId"`
+	OriginalEndToEndId string `xml:"TxInf>OrgnlEndToEndId"`
 }
-
 type Amount struct {
 	Currency string `xml:"Ccy,attr"`
 	Value    string `xml:",chardata"`
@@ -80,12 +82,50 @@ func handleIncomingMessage(message string) {
 	if parseMessage.XMLName.Space == "https://www.bcb.gov.br/pi/pacs.008/1.14" {
 		respondPacs008(parseMessage)
 	}
+
+	if parseMessage.XMLName.Space == "https://www.bcb.gov.br/pi/pacs.004/1.5" {
+		respondPacs004(parseMessage)
+	}
 }
 
 func respondPacs008(message Envelope) {
-	e2eID := message.Document.Transfer.EndToEndId
+	e2eID := message.Document.TransferPacs008.EndToEndId
 
 	pacs002 := services.GeneratePacs002(e2eID)
+
+	var responseContent bytes.Buffer
+
+	mw := multipart.NewWriter(&responseContent)
+
+	err := services.AddXMLPart(mw, pacs002)
+	if err != nil {
+		panic("Error adding XML part: " + err.Error())
+	}
+
+	mw.Close()
+
+	var compressedMessage bytes.Buffer
+
+	err = services.CompressContentToGzip(responseContent.Bytes(), &compressedMessage)
+	if err != nil {
+		panic("Error adding XML part: " + err.Error())
+	}
+
+	conn := services.CreateConnection()
+
+	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
+	if err != nil {
+		fmt.Println("Error posting message:", err)
+	}
+}
+
+func respondPacs004(message Envelope) {
+	e2eID := message.Document.TransferPacs004.OriginalEndToEndId
+	returnId := message.Document.TransferPacs004.ReturnID
+
+	fmt.Println("E2E ID PACS004: ", e2eID)
+
+	pacs002 := services.GeneratePacs002ForPacs004(e2eID, returnId)
 
 	var responseContent bytes.Buffer
 

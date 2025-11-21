@@ -355,7 +355,48 @@ var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </Document>
 </Envelope>`
 
-var pacs008_511 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+var pacs002_pacs004 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.15">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>pacs.002.spi.1.15</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <FIToFIPmtStsRpt>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+            </GrpHdr>
+            <TxInfAndSts>
+                <OrgnlInstrId>%s</OrgnlInstrId>
+                <OrgnlEndToEndId>%s</OrgnlEndToEndId>
+                <TxSts>ACSP</TxSts>
+            </TxInfAndSts>
+        </FIToFIPmtStsRpt>
+    </Document>
+</Envelope>`
+
+var pacs008_511_manu = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Envelope xmlns="https://www.bcb.gov.br/pi/pacs.008/1.14">
     <AppHdr>
         <Fr>
@@ -477,6 +518,132 @@ var pacs008_511 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </Document>
 </Envelope>`
 
+var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.008/1.14">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>pacs.008.spi.1.14</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <FIToFICstmrCdtTrf>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+                <NbOfTxs>1</NbOfTxs>
+                <SttlmInf>
+                    <SttlmMtd>CLRG</SttlmMtd>
+                </SttlmInf>
+                <PmtTpInf>
+                    <InstrPrty>HIGH</InstrPrty>
+                    <SvcLvl>
+                        <Prtry>PAGPRI</Prtry>
+                    </SvcLvl>
+                </PmtTpInf>
+            </GrpHdr>
+            <CdtTrfTxInf>
+                <PmtId>
+                    <EndToEndId>%s</EndToEndId>
+					<TxId>01KAKNNS2WAF5BY136ZWW8J1J4</TxId>
+                </PmtId>
+                <IntrBkSttlmAmt Ccy="BRL">2.75</IntrBkSttlmAmt>
+                <AccptncDtTm>%s</AccptncDtTm>
+                <ChrgBr>SLEV</ChrgBr>
+                <MndtRltdInf>
+                    <Tp>
+                        <LclInstrm>
+                            <Prtry>QRDN</Prtry>
+                        </LclInstrm>
+                    </Tp>
+                </MndtRltdInf>
+                <Dbtr>
+                    <Nm>Rogerio Inacio</Nm>
+                    <Id>
+                        <PrvtId>
+                            <Othr>
+                                <Id>14811554744</Id>
+                            </Othr>
+                        </PrvtId>
+                    </Id>
+                </Dbtr>
+                <DbtrAcct>
+                    <Id>
+                        <Othr>
+                            <Id>0038952</Id>
+                            <Issr>0001</Issr>
+                        </Othr>
+                    </Id>
+                    <Tp>
+                        <Cd>CACC</Cd>
+                    </Tp>
+                </DbtrAcct>
+                <DbtrAgt>
+                    <FinInstnId>
+                        <ClrSysMmbId>
+                            <MmbId>52833288</MmbId>
+                        </ClrSysMmbId>
+                    </FinInstnId>
+                </DbtrAgt>
+                <CdtrAgt>
+                    <FinInstnId>
+                        <ClrSysMmbId>
+                            <MmbId>49931906</MmbId>
+                        </ClrSysMmbId>
+                    </FinInstnId>
+                </CdtrAgt>
+                <Cdtr>
+                    <Id>
+                        <PrvtId>
+                            <Othr>
+                                <Id>16652826000175</Id>
+                            </Othr>
+                        </PrvtId>
+                    </Id>
+                </Cdtr>
+                <CdtrAcct>
+                    <Id>
+                        <Othr>
+                            <Id>629926472</Id>
+                            <Issr>0001</Issr>
+                        </Othr>
+                    </Id>
+                    <Tp>
+                        <Cd>CACC</Cd>
+                    </Tp>
+                    <Prxy>
+                        <Id>7a03c879-d5a8-423b-af6f-f12dc706edfc</Id>
+                    </Prxy>
+                </CdtrAcct>
+                <Purp>
+                    <Cd>IPAY</Cd>
+                </Purp>
+                <RmtInf>
+                    <Ustrd>2JHJ2uSXScqHPpJmzmdZh8</Ustrd>
+                </RmtInf>
+            </CdtTrfTxInf>
+        </FIToFICstmrCdtTrf>
+    </Document>
+</Envelope>`
+
 func CreateMessage() string {
 	now := getCurrentTime().UTC()
 	endToEndID, _ := GenerateEndToEndId("52833288", now)
@@ -485,7 +652,8 @@ func CreateMessage() string {
 	//returnId := GenerateReturnId("52833288")
 
 	//ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
-	ready := fmt.Sprintf(pacs008_511, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+	//ready := fmt.Sprintf(pacs008_511_manu, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+	ready := fmt.Sprintf(pacs008_511_dict, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
 
 	//ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, endToEndID) //pacs004
 	//ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, endToEndID2) //pacs002
@@ -509,6 +677,21 @@ func GeneratePacs002(e2eID string) string {
 	id, _ := GenerateMsgId("52833288")
 
 	ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), e2eID, e2eID) //pacs002
+	str, err := SignMessage(ready)
+	if err != nil {
+		fmt.Println("Error calling Java function:", err)
+		return ""
+	}
+
+	return str
+}
+
+func GeneratePacs002ForPacs004(e2eID, returnId string) string {
+	now := getCurrentTime().UTC()
+	//endToEndID, _ := GenerateEndToEndId("52833288", now)
+	id, _ := GenerateMsgId("52833288")
+
+	ready := fmt.Sprintf(pacs002_pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, e2eID) //pacs002
 	str, err := SignMessage(ready)
 	if err != nil {
 		fmt.Println("Error calling Java function:", err)

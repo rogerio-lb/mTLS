@@ -18,7 +18,7 @@ func main() {
 
 	mw := multipart.NewWriter(&responseContent)
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 1; i++ {
 		message := services.CreateMessage()
 		err := services.AddXMLPart(mw, message)
 
