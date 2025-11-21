@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"mTLS/services"
+	"mime/multipart"
 	"time"
 )
 
@@ -53,7 +55,7 @@ func main() {
 			break
 		}
 
-		handleIncomingMessage(response.Message)
+		go handleIncomingMessage(response.Message)
 	}
 
 	//services.FinishStream(conn, "/api/v1/out/52833288/stream/11e5d52c-e302-4aec-af0a-83b3f068d26a")
@@ -74,4 +76,39 @@ func handleIncomingMessage(message string) {
 
 	fmt.Printf("Parsed Message:\n")
 	fmt.Println("Message Type: ", parseMessage.XMLName.Space)
+
+	if parseMessage.XMLName.Space == "https://www.bcb.gov.br/pi/pacs.008/1.14" {
+		respondPacs008(parseMessage)
+	}
+}
+
+func respondPacs008(message Envelope) {
+	e2eID := message.Document.Transfer.EndToEndId
+
+	pacs002 := services.GeneratePacs002(e2eID)
+
+	var responseContent bytes.Buffer
+
+	mw := multipart.NewWriter(&responseContent)
+
+	err := services.AddXMLPart(mw, pacs002)
+	if err != nil {
+		panic("Error adding XML part: " + err.Error())
+	}
+
+	mw.Close()
+
+	var compressedMessage bytes.Buffer
+
+	err = services.CompressContentToGzip(responseContent.Bytes(), &compressedMessage)
+	if err != nil {
+		panic("Error adding XML part: " + err.Error())
+	}
+
+	conn := services.CreateConnection()
+
+	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
+	if err != nil {
+		fmt.Println("Error posting message:", err)
+	}
 }

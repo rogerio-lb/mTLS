@@ -315,7 +315,7 @@ var pacs004 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </Envelope>`
 
 var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.14">
+<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.15">
     <AppHdr>
         <Fr>
             <FIId>
@@ -336,7 +336,7 @@ var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             </FIId>
         </To>
         <BizMsgIdr>%s</BizMsgIdr>
-        <MsgDefIdr>pacs.002.spi.1.14</MsgDefIdr>
+        <MsgDefIdr>pacs.002.spi.1.15</MsgDefIdr>
         <CreDt>%s</CreDt>
         <Sgntr/>
     </AppHdr>
@@ -495,6 +495,21 @@ func CreateMessage() string {
 
 	str, err := SignMessage(ready)
 	//str, err := services.SignMessage(pibr001)
+	if err != nil {
+		fmt.Println("Error calling Java function:", err)
+		return ""
+	}
+
+	return str
+}
+
+func GeneratePacs002(e2eID string) string {
+	now := getCurrentTime().UTC()
+	//endToEndID, _ := GenerateEndToEndId("52833288", now)
+	id, _ := GenerateMsgId("52833288")
+
+	ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), e2eID, e2eID) //pacs002
+	str, err := SignMessage(ready)
 	if err != nil {
 		fmt.Println("Error calling Java function:", err)
 		return ""
