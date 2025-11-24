@@ -483,7 +483,7 @@ var pacs008_511_manu = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>71027866</MmbId>
+                            <MmbId>99999004</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -652,8 +652,8 @@ func CreateMessage() string {
 	//returnId := GenerateReturnId("52833288")
 
 	//ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
-	//ready := fmt.Sprintf(pacs008_511_manu, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
-	ready := fmt.Sprintf(pacs008_511_dict, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+	ready := fmt.Sprintf(pacs008_511_manu, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+	//ready := fmt.Sprintf(pacs008_511_dict, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
 
 	//ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, endToEndID) //pacs004
 	//ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, endToEndID2) //pacs002
