@@ -28,7 +28,9 @@ func GetMessages(conn *tls.Conn, step string) (*GetMessageResponse, error) {
 }
 
 func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
-	fmt.Println("Starting stream...")
+	if pullnext == "" {
+		fmt.Println("Starting stream...")
+	}
 
 	if pullnext == "" {
 		pullnext = "/api/v1/out/52833288/stream/start"
@@ -82,12 +84,16 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 		}*/
 	}
 
-	fmt.Printf("Status: %s\n", resp.Status)
-	fmt.Printf("Body received (%d bytes)\n", len(body))
-	fmt.Printf("Body: %s\n", decompressedMessage)
-	fmt.Printf("Headers: %v\n", resp.Header)
+	if resp.StatusCode != http.StatusNoContent {
+		fmt.Printf("Status: %s\n", resp.Status)
+		fmt.Printf("Body received (%d bytes)\n", len(body))
+		fmt.Printf("Body: %s\n", decompressedMessage)
+		fmt.Printf("Headers: %v\n", resp.Header)
+	}
 
-	fmt.Println("Stream started successfully.")
+	if pullnext == "/api/v1/out/52833288/stream/start" {
+		fmt.Println("Stream started successfully.")
+	}
 
 	return &GetMessageResponse{
 		Message:    string(decompressedMessage),
@@ -118,18 +124,21 @@ func FinishStream(conn *tls.Conn, pullNext string) error {
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	/*body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("Failed to read body: %v\n", err)
 		return err
-	}
+	}*/
 
-	fmt.Printf("Status: %s\n", resp.Status)
-	fmt.Printf("Body received (%d bytes)\n", len(body))
-	fmt.Printf("Body: %s\n", body)
-	fmt.Printf("Headers: %v\n", resp.Header)
+	/*if resp.StatusCode != http.StatusNoContent {
+		fmt.Printf("Status: %s\n", resp.Status)
+		fmt.Printf("Status Code: %d\n", resp.StatusCode)
+		fmt.Printf("Body received (%d bytes)\n", len(body))
+		fmt.Printf("Body: %s\n", body)
+		fmt.Printf("Headers: %v\n", resp.Header)
 
-	fmt.Println("Stream finished successfully.")
+		fmt.Println("Stream finished successfully.")
+	}*/
 
 	return nil
 }

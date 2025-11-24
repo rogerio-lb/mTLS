@@ -7,8 +7,10 @@ import (
 	"mime/multipart"
 )
 
+const debug = false
+
 func main() {
-	conn := services.CreateConnection()
+	conn := services.CreateConnection(debug)
 
 	if conn == nil {
 		panic("Failed to create TLS connection")

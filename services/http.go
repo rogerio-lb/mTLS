@@ -27,8 +27,10 @@ func ConfigureMTLS() *tls.Config {
 	return tlsConfig
 }
 
-func CreateConnection() *tls.Conn {
-	fmt.Println("=== Testing TLS Connection ===")
+func CreateConnection(debug bool) *tls.Conn {
+	if debug {
+		fmt.Println("=== Testing TLS Connection ===")
+	}
 
 	tlsConfig := ConfigureMTLS()
 
@@ -39,10 +41,12 @@ func CreateConnection() *tls.Conn {
 		return nil
 	}
 
-	fmt.Println("TLS connection successful!")
-	fmt.Printf("TLS Version: %x\n", conn.ConnectionState().Version)
-	fmt.Printf("Cipher Suite: %x\n", conn.ConnectionState().CipherSuite)
-	fmt.Printf("Server Certificates: %d\n", len(conn.ConnectionState().PeerCertificates))
+	if debug {
+		fmt.Println("TLS connection successful!")
+		fmt.Printf("TLS Version: %x\n", conn.ConnectionState().Version)
+		fmt.Printf("Cipher Suite: %x\n", conn.ConnectionState().CipherSuite)
+		fmt.Printf("Server Certificates: %d\n", len(conn.ConnectionState().PeerCertificates))
+	}
 
 	return conn
 }

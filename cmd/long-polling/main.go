@@ -31,10 +31,12 @@ type Amount struct {
 	Value    string `xml:",chardata"`
 }
 
+const debug = false
+
 func main() {
-	conn := services.CreateConnection()
-	fmt.Println("=== TLS Connection Test Completed ===")
-	fmt.Println("Sending HTTP/1.0 request...")
+	conn := services.CreateConnection(debug)
+	/*fmt.Println("=== TLS Connection Test Completed ===")
+	fmt.Println("Sending HTTP/1.0 request...")*/
 
 	var response *services.GetMessageResponse
 
@@ -49,7 +51,7 @@ func main() {
 
 	for {
 		time.Sleep(2 * time.Second)
-		connection := services.CreateConnection()
+		connection := services.CreateConnection(debug)
 		response, err = services.GetMessages(connection, response.PIPullNext)
 		if err != nil {
 			//			services.FinishStream(connection, response.PIPullNext)
@@ -76,8 +78,8 @@ func handleIncomingMessage(message string) {
 		return
 	}
 
-	fmt.Printf("Parsed Message:\n")
-	fmt.Println("Message Type: ", parseMessage.XMLName.Space)
+	/*fmt.Printf("Parsed Message:\n")
+	fmt.Println("Message Type: ", parseMessage.XMLName.Space)*/
 
 	if parseMessage.XMLName.Space == "https://www.bcb.gov.br/pi/pacs.008/1.14" {
 		respondPacs008(parseMessage)
@@ -111,7 +113,7 @@ func respondPacs008(message Envelope) {
 		panic("Error adding XML part: " + err.Error())
 	}
 
-	conn := services.CreateConnection()
+	conn := services.CreateConnection(debug)
 
 	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
 	if err != nil {
@@ -122,8 +124,6 @@ func respondPacs008(message Envelope) {
 func respondPacs004(message Envelope) {
 	e2eID := message.Document.TransferPacs004.OriginalEndToEndId
 	returnId := message.Document.TransferPacs004.ReturnID
-
-	fmt.Println("E2E ID PACS004: ", e2eID)
 
 	pacs002 := services.GeneratePacs002ForPacs004(e2eID, returnId)
 
@@ -145,7 +145,7 @@ func respondPacs004(message Envelope) {
 		panic("Error adding XML part: " + err.Error())
 	}
 
-	conn := services.CreateConnection()
+	conn := services.CreateConnection(debug)
 
 	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
 	if err != nil {
