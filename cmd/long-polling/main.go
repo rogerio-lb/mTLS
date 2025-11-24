@@ -95,6 +95,8 @@ func respondPacs008(message Envelope) {
 
 	pacs002 := services.GeneratePacs002(e2eID)
 
+	fmt.Println("E2E ID:", e2eID)
+
 	var responseContent bytes.Buffer
 
 	mw := multipart.NewWriter(&responseContent)
