@@ -285,26 +285,26 @@ var pacs004 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <TxInf>
                 <RtrId>%s</RtrId>
                 <OrgnlEndToEndId>%s</OrgnlEndToEndId>
-                <RtrdIntrBkSttlmAmt Ccy="BRL">1000.00</RtrdIntrBkSttlmAmt>
+                <RtrdIntrBkSttlmAmt Ccy="BRL">50</RtrdIntrBkSttlmAmt>
                 <SttlmPrty>HIGH</SttlmPrty>
                 <ChrgBr>SLEV</ChrgBr>
                 <RtrRsnInf>
                     <Rsn>
-                        <Cd>BE08</Cd>
+                        <Cd>FR01</Cd>
                     </Rsn>
                 </RtrRsnInf>
                 <OrgnlTxRef>
                     <DbtrAgt>
                         <FinInstnId>
                             <ClrSysMmbId>
-                                <MmbId>99999009</MmbId>
+                                <MmbId>52833288</MmbId>
                             </ClrSysMmbId>
                         </FinInstnId>
                     </DbtrAgt>
                     <CdtrAgt>
                         <FinInstnId>
                             <ClrSysMmbId>
-                                <MmbId>99999010</MmbId>
+                                <MmbId>58160789</MmbId>
                             </ClrSysMmbId>
                         </FinInstnId>
                     </CdtrAgt>
@@ -442,7 +442,7 @@ var pacs008_511_manu = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <PmtId>
                     <EndToEndId>%s</EndToEndId>
                 </PmtId>
-                <IntrBkSttlmAmt Ccy="BRL">1.00</IntrBkSttlmAmt>
+                <IntrBkSttlmAmt Ccy="BRL">5.00</IntrBkSttlmAmt>
                 <AccptncDtTm>%s</AccptncDtTm>
                 <ChrgBr>SLEV</ChrgBr>
                 <MndtRltdInf>
@@ -646,16 +646,16 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 func CreateMessage() string {
 	now := getCurrentTime().UTC()
-	endToEndID, _ := GenerateEndToEndId("52833288", now)
+	//endToEndID, _ := GenerateEndToEndId("52833288", now)
 	id, _ := GenerateMsgId("52833288")
 
-	//returnId := GenerateReturnId("52833288")
+	returnId := GenerateReturnId("52833288")
 
 	//ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
-	ready := fmt.Sprintf(pacs008_511_manu, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+	//ready := fmt.Sprintf(pacs008_511_manu, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
 	//ready := fmt.Sprintf(pacs008_511_dict, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
 
-	//ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, endToEndID) //pacs004
+	ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, "E58160789202511261733WXJc7bDqDd0") //pacs004
 	//ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, endToEndID2) //pacs002
 	//ready := fmt.Sprintf(camt060_saldo_momento, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_saldo_momento
 	//ready := fmt.Sprintf(camt060_saldo_data_anterior, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_saldo_data_anterior
@@ -667,6 +667,8 @@ func CreateMessage() string {
 		fmt.Println("Error calling Java function:", err)
 		return ""
 	}
+
+	fmt.Println("EndToEndID:", returnId)
 
 	return str
 }
