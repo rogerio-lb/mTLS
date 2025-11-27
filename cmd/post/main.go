@@ -21,13 +21,13 @@ func main() {
 	mw := multipart.NewWriter(&responseContent)
 
 	for i := 0; i < 1; i++ {
-		//message := services.CreateMessage()
-		message := services.GeneratePacs004ForDict(
-			"E49931906202511271738eT6eMqvatl9",
+		message := services.CreateMessage()
+		/*message := services.GeneratePacs004ForDict(
+			"E49931906202511271910POQ8oNqitmU",
 			"49931906",
-			"0.10",
-			services.USER_REQUEST_REASON,
-		)
+			"6.00",
+			services.FRAUD_REASON,
+		)*/
 		err := services.AddXMLPart(mw, message)
 
 		if err != nil {

@@ -90,7 +90,7 @@ func handleIncomingMessage(message string) {
 	/*fmt.Printf("Parsed Message:\n")
 	fmt.Println("Message Type: ", parseMessage.XMLName.Space)*/
 
-	handleMessage(parseMessage)
+	handleMessage(parseMessage, message)
 }
 
 func respondPacs008(message Envelope) {
@@ -156,7 +156,7 @@ func respondPacs004(message Envelope) {
 	}
 }
 
-func handleMessage(message Envelope) {
+func handleMessage(message Envelope, rawMessage string) {
 	if message.XMLName.Space == "https://www.bcb.gov.br/pi/pacs.002/1.15" {
 		fmt.Println()
 		fmt.Println("==================================== Received PACS002 ====================================")
@@ -164,6 +164,11 @@ func handleMessage(message Envelope) {
 		fmt.Println("Original Instruction ID:", message.Document.TransferPacs002.OriginalInstructionId)
 		fmt.Println("Transaction Status:", message.Document.TransferPacs002.TransactionStatus)
 		fmt.Println("==================================== End of PACS002 ====================================")
+
+		if message.Document.TransferPacs002.TransactionStatus == "RJCT" {
+			fmt.Println("Transaction was rejected. Reason:", rawMessage)
+		}
+
 		return
 	}
 

@@ -514,7 +514,7 @@ var pacs008_511_manu = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <PmtId>
                     <EndToEndId>%s</EndToEndId>
                 </PmtId>
-                <IntrBkSttlmAmt Ccy="BRL">5.00</IntrBkSttlmAmt>
+                <IntrBkSttlmAmt Ccy="BRL">50.55</IntrBkSttlmAmt>
                 <AccptncDtTm>%s</AccptncDtTm>
                 <ChrgBr>SLEV</ChrgBr>
                 <MndtRltdInf>
@@ -555,7 +555,7 @@ var pacs008_511_manu = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>99999004</MmbId>
+                            <MmbId>49931906</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -563,7 +563,7 @@ var pacs008_511_manu = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>61363314000143</Id>
+                                <Id>16652826000175</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -571,7 +571,7 @@ var pacs008_511_manu = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>90570189</Id>
+                            <Id>629926472</Id>
                             <Issr>0001</Issr>
                         </Othr>
                     </Id>
@@ -677,7 +677,7 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>58160789</MmbId>
+                            <MmbId>49931906</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -685,7 +685,7 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>00011098000182</Id>
+                                <Id>16652826000175</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -693,15 +693,15 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>008947835</Id>
-                            <Issr>0097</Issr>
+                            <Id>62992647</Id>
+                            <Issr>0001</Issr>
                         </Othr>
                     </Id>
                     <Tp>
-                        <Cd>CACC</Cd>
+                        <Cd>TRAN</Cd>
                     </Tp>
                     <Prxy>
-                        <Id>+5511981047272</Id>
+                        <Id>7a03c879-d5a8-423b-af6f-f12dc706edfc</Id>
                     </Prxy>
                 </CdtrAcct>
                 <Purp>
