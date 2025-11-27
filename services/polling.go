@@ -14,6 +14,8 @@ import (
 )
 
 type GetMessageResponse struct {
+	StatusCode int
+	Headers    http.Header
 	Message    string
 	PIPullNext string
 	resourceID string
@@ -84,18 +86,20 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 		}*/
 	}
 
-	if resp.StatusCode != http.StatusNoContent {
+	/*if resp.StatusCode != http.StatusNoContent {
 		fmt.Printf("Status: %s\n", resp.Status)
 		fmt.Printf("Body received (%d bytes)\n", len(body))
 		fmt.Printf("Body: %s\n", decompressedMessage)
 		fmt.Printf("Headers: %v\n", resp.Header)
-	}
+	}*/
 
 	if pullnext == "/api/v1/out/52833288/stream/start" {
 		fmt.Println("Stream started successfully.")
 	}
 
 	return &GetMessageResponse{
+		StatusCode: resp.StatusCode,
+		Headers:    resp.Header,
 		Message:    string(decompressedMessage),
 		PIPullNext: resp.Header.Get("PI-Pull-Next"),
 		resourceID: resp.Header.Get("Pi-Resourceid"),

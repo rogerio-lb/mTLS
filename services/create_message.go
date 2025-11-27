@@ -24,7 +24,11 @@ const (
 	returnIdISPBLen   = 8
 	returnIdSuffixLen = 11
 	// All alphanumeric characters as per SPI specification [a-z|A-Z|0-9]
-	returnIdAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	returnIdAlphabet     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	FRAUD_REASON         = "FR01"
+	USER_REQUEST_REASON  = "MD06"
+	BANK_ERROR_REASON    = "BE08"
+	SERVICE_CAUSE_REASON = "SL02"
 )
 
 var (
@@ -314,6 +318,74 @@ var pacs004 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </Document>
 </Envelope>`
 
+var pacs004_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Envelope xmlns="https://www.bcb.gov.br/pi/pacs.004/1.5">
+    <AppHdr>
+        <Fr>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>52833288</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </Fr>
+        <To>
+            <FIId>
+                <FinInstnId>
+                    <Othr>
+                        <Id>00038166</Id>
+                    </Othr>
+                </FinInstnId>
+            </FIId>
+        </To>
+        <BizMsgIdr>%s</BizMsgIdr>
+        <MsgDefIdr>pacs.004.spi.1.5</MsgDefIdr>
+        <CreDt>%s</CreDt>
+        <Sgntr/>
+    </AppHdr>
+    <Document>
+        <PmtRtr>
+            <GrpHdr>
+                <MsgId>%s</MsgId>
+                <CreDtTm>%s</CreDtTm>
+                <NbOfTxs>1</NbOfTxs>
+                <SttlmInf>
+                    <SttlmMtd>CLRG</SttlmMtd>
+                </SttlmInf>
+            </GrpHdr>
+            <TxInf>
+                <RtrId>%s</RtrId>
+                <OrgnlEndToEndId>%s</OrgnlEndToEndId>
+                <RtrdIntrBkSttlmAmt Ccy="BRL">%s</RtrdIntrBkSttlmAmt>
+                <SttlmPrty>HIGH</SttlmPrty>
+                <ChrgBr>SLEV</ChrgBr>
+                <RtrRsnInf>
+                    <Rsn>
+                        <Cd>%s</Cd>
+                    </Rsn>
+                </RtrRsnInf>
+                <OrgnlTxRef>
+                    <DbtrAgt>
+                        <FinInstnId>
+                            <ClrSysMmbId>
+                                <MmbId>52833288</MmbId>
+                            </ClrSysMmbId>
+                        </FinInstnId>
+                    </DbtrAgt>
+                    <CdtrAgt>
+                        <FinInstnId>
+                            <ClrSysMmbId>
+                                <MmbId>%s</MmbId>
+                            </ClrSysMmbId>
+                        </FinInstnId>
+                    </CdtrAgt>
+                </OrgnlTxRef>
+            </TxInf>
+        </PmtRtr>
+    </Document>
+</Envelope>`
+
 var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Envelope xmlns="https://www.bcb.gov.br/pi/pacs.002/1.15">
     <AppHdr>
@@ -563,15 +635,14 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <CdtTrfTxInf>
                 <PmtId>
                     <EndToEndId>%s</EndToEndId>
-					<TxId>01KAKNNS2WAF5BY136ZWW8J1J4</TxId>
                 </PmtId>
-                <IntrBkSttlmAmt Ccy="BRL">2.75</IntrBkSttlmAmt>
+                <IntrBkSttlmAmt Ccy="BRL">50</IntrBkSttlmAmt>
                 <AccptncDtTm>%s</AccptncDtTm>
                 <ChrgBr>SLEV</ChrgBr>
                 <MndtRltdInf>
                     <Tp>
                         <LclInstrm>
-                            <Prtry>QRDN</Prtry>
+                            <Prtry>DICT</Prtry>
                         </LclInstrm>
                     </Tp>
                 </MndtRltdInf>
@@ -606,7 +677,7 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>49931906</MmbId>
+                            <MmbId>58160789</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -614,7 +685,7 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>16652826000175</Id>
+                                <Id>00011098000182</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -622,22 +693,22 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>629926472</Id>
-                            <Issr>0001</Issr>
+                            <Id>008947835</Id>
+                            <Issr>0097</Issr>
                         </Othr>
                     </Id>
                     <Tp>
                         <Cd>CACC</Cd>
                     </Tp>
                     <Prxy>
-                        <Id>7a03c879-d5a8-423b-af6f-f12dc706edfc</Id>
+                        <Id>+5511981047272</Id>
                     </Prxy>
                 </CdtrAcct>
                 <Purp>
                     <Cd>IPAY</Cd>
                 </Purp>
                 <RmtInf>
-                    <Ustrd>2JHJ2uSXScqHPpJmzmdZh8</Ustrd>
+                    <Ustrd>Teste</Ustrd>
                 </RmtInf>
             </CdtTrfTxInf>
         </FIToFICstmrCdtTrf>
@@ -646,16 +717,16 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 func CreateMessage() string {
 	now := getCurrentTime().UTC()
-	//endToEndID, _ := GenerateEndToEndId("52833288", now)
+	endToEndID, _ := GenerateEndToEndId("52833288", now)
 	id, _ := GenerateMsgId("52833288")
 
-	returnId := GenerateReturnId("52833288")
+	//returnId := GenerateReturnId("52833288")
 
 	//ready := fmt.Sprintf(pacs008, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
-	//ready := fmt.Sprintf(pacs008_511_manu, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
+	ready := fmt.Sprintf(pacs008_511_manu, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
 	//ready := fmt.Sprintf(pacs008_511_dict, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, now.Format("2006-01-02T15:04:05.000Z")) //pacs008
 
-	ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, "E58160789202511261733WXJc7bDqDd0") //pacs004
+	//ready := fmt.Sprintf(pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, "E581607892025112619453PDvqKHESKg") //pacs004
 	//ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), endToEndID, endToEndID2) //pacs002
 	//ready := fmt.Sprintf(camt060_saldo_momento, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_saldo_momento
 	//ready := fmt.Sprintf(camt060_saldo_data_anterior, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z")) //camt060_saldo_data_anterior
@@ -668,7 +739,7 @@ func CreateMessage() string {
 		return ""
 	}
 
-	fmt.Println("EndToEndID:", returnId)
+	fmt.Println("EndToEndID:", endToEndID)
 
 	return str
 }
@@ -679,6 +750,32 @@ func GeneratePacs002(e2eID string) string {
 	id, _ := GenerateMsgId("52833288")
 
 	ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), e2eID, e2eID) //pacs002
+	str, err := SignMessage(ready)
+	if err != nil {
+		fmt.Println("Error calling Java function:", err)
+		return ""
+	}
+
+	return str
+}
+
+func GeneratePacs004ForDict(e2eID, ispb, value, reason string) string {
+	now := getCurrentTime().UTC()
+	id, _ := GenerateMsgId("52833288")
+	returnId := GenerateReturnId("52833288")
+
+	ready := fmt.Sprintf(
+		pacs004_dict,
+		id,
+		now.Format("2006-01-02T15:04:05.000Z"),
+		id,
+		now.Format("2006-01-02T15:04:05.000Z"),
+		returnId,
+		e2eID,
+		value,
+		reason,
+		ispb,
+	) //pacs004
 	str, err := SignMessage(ready)
 	if err != nil {
 		fmt.Println("Error calling Java function:", err)
