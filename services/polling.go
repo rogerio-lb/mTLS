@@ -193,10 +193,6 @@ func PostMessage(conn *tls.Conn, content string, boundary string) error {
 	fmt.Printf("Status: %s\n", resp.Status)
 	fmt.Printf("Headers: %v\n", resp.Header)
 
-	responseBody, _ := io.ReadAll(resp.Body)
-
-	fmt.Printf("Body: %s\n", responseBody)
-
 	return nil
 }
 
