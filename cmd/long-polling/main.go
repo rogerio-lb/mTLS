@@ -203,4 +203,5 @@ func handleMessage(message Envelope, rawMessage string) {
 	}
 
 	fmt.Println("Received: ", message.XMLName.Space)
+	fmt.Println("Full Message: ", rawMessage)
 }
