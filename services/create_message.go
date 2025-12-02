@@ -782,12 +782,13 @@ func GeneratePacs004ForDict(e2eID, ispb, value, reason string) string {
 		return ""
 	}
 
+	fmt.Println("ReturnId:", returnId)
+
 	return str
 }
 
 func GeneratePacs002ForPacs004(e2eID, returnId string) string {
 	now := getCurrentTime().UTC()
-	//endToEndID, _ := GenerateEndToEndId("52833288", now)
 	id, _ := GenerateMsgId("52833288")
 
 	ready := fmt.Sprintf(pacs002_pacs004, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), returnId, e2eID) //pacs002
