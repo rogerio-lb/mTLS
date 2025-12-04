@@ -22,12 +22,22 @@ func main() {
 
 	for i := 0; i < 1; i++ {
 		//message := services.CreateMessage()
-		message := services.GeneratePacs004ForDict(
-			"E54811417202512021413c2qwHBDtry1",
+		/*message := services.GeneratePacs004ForDict(
+			"E54811417202512041739bJrrfAFhvUy",
 			"54811417",
-			"5.50",
+			"10.00",
 			services.FRAUD_REASON,
+		)*/
+		message := services.GeneratePacs008Manual(
+			"99999004",
+			"003816482",
+			"0001",
+			"43528405058",
+			"CACC",
+			"10.00",
+			"Teste de envio",
 		)
+
 		err := services.AddXMLPart(mw, message)
 
 		if err != nil {
