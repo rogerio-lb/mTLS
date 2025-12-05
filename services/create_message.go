@@ -636,7 +636,7 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <PmtId>
                     <EndToEndId>%s</EndToEndId>
                 </PmtId>
-                <IntrBkSttlmAmt Ccy="BRL">50</IntrBkSttlmAmt>
+                <IntrBkSttlmAmt Ccy="BRL">%s</IntrBkSttlmAmt>
                 <AccptncDtTm>%s</AccptncDtTm>
                 <ChrgBr>SLEV</ChrgBr>
                 <MndtRltdInf>
@@ -677,7 +677,7 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAgt>
                     <FinInstnId>
                         <ClrSysMmbId>
-                            <MmbId>54811417</MmbId>
+                            <MmbId>%s</MmbId>
                         </ClrSysMmbId>
                     </FinInstnId>
                 </CdtrAgt>
@@ -685,7 +685,7 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <Id>
                         <PrvtId>
                             <Othr>
-                                <Id>60166684015583</Id>
+                                <Id>%s</Id>
                             </Othr>
                         </PrvtId>
                     </Id>
@@ -693,22 +693,22 @@ var pacs008_511_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <CdtrAcct>
                     <Id>
                         <Othr>
-                            <Id>00000000000000002615</Id>
-                            <Issr>0001</Issr>
+                            <Id>%s</Id>
+                            <Issr>%s</Issr>
                         </Othr>
                     </Id>
                     <Tp>
-                        <Cd>TRAN</Cd>
+                        <Cd>%s</Cd>
                     </Tp>
                     <Prxy>
-                        <Id>+5511890505849</Id>
+                        <Id>%s</Id>
                     </Prxy>
                 </CdtrAcct>
                 <Purp>
                     <Cd>IPAY</Cd>
                 </Purp>
                 <RmtInf>
-                    <Ustrd>14:55</Ustrd>
+                    <Ustrd>%s</Ustrd>
                 </RmtInf>
             </CdtTrfTxInf>
         </FIToFICstmrCdtTrf>
@@ -764,6 +764,42 @@ func GeneratePacs008Manual(ispb, account, branch, document, accountType, amount,
 		accountType,
 		message,
 	) //pacs008
+
+	str, err := SignMessage(ready)
+
+	if err != nil {
+		fmt.Println("Error calling Java function:", err)
+		return ""
+	}
+
+	fmt.Println("EndToEndID:", endToEndID)
+
+	return str
+}
+
+func GeneratePacs008Dict(ispb, account, branch, document, accountType, amount, message, key string) string {
+	now := getCurrentTime().UTC()
+	endToEndID, _ := GenerateEndToEndId("52833288", now)
+	id, _ := GenerateMsgId("52833288")
+
+	ready := fmt.Sprintf(
+		pacs008_511_dict,
+		id,
+		now.Format("2006-01-02T15:04:05.000Z"),
+		id, now.Format("2006-01-02T15:04:05.000Z"),
+		endToEndID,
+		amount,
+		now.Format("2006-01-02T15:04:05.000Z"),
+		ispb,
+		document,
+		account,
+		branch,
+		accountType,
+		key,
+		message,
+	) //pacs008
+
+	//fmt.Println("Ready Message:", ready)
 
 	str, err := SignMessage(ready)
 
