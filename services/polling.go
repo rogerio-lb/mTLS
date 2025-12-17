@@ -21,50 +21,79 @@ type GetMessageResponse struct {
 	resourceID string
 }
 
-func GetMessages(conn *tls.Conn, step string) (*GetMessageResponse, error) {
+func GetMessages(conn *http.Client, step string, ispb string) (*GetMessageResponse, error) {
 	if step == "start" {
-		return GetMessage(conn, "")
+		return GetMessage(conn, "", ispb)
 	}
 
-	return GetMessage(conn, step)
+	return GetMessage(conn, step, ispb)
 }
 
-func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
+func GetMessage(conn *http.Client, pullnext string, ispb string) (*GetMessageResponse, error) {
 	if pullnext == "" {
 		fmt.Println("Starting stream...")
 	}
 
 	if pullnext == "" {
-		pullnext = "/api/v1/out/52833288/stream/start"
+		//pullnext = "/api/v1/out/52833288/stream/start"
+		pullnext = "start"
 	}
 
-	request := "GET " + pullnext + " HTTP/1.2\r\n" +
-		"Host: icom-h.pi.rsfn.net.br\r\n" +
-		//"Accept: multipart/mixed\r\n" +
-		"Accept: application/xml\r\n" +
-		"Accept-Encoding: gzip\r\n" +
-		"User-Agent: Go-http-client/1.2\r\n" +
-		"Connection: Close\r\n\r\n"
+	//url := fmt.Sprintf("%s%s", "http://localhost:3000", pullnext)
+	url := fmt.Sprintf("%s/api/v1/out/%s/stream/%s", "http://localhost:3000", ispb, pullnext)
 
-	_, err := conn.Write([]byte(request))
+	httpRequest, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Printf("Failed to write request: %v\n", err)
+		fmt.Printf("Failed to create request: %v\n", err)
 		return nil, err
 	}
 
-	reader := bufio.NewReader(conn)
-	resp, err := http.ReadResponse(reader, nil)
+	httpRequest.Host = "icom-h.pi.rsfn.net.br"
+	httpRequest.Header.Set("Accept", "application/xml")
+	httpRequest.Header.Set("Accept-Encoding", "gzip")
+	httpRequest.Header.Set("User-Agent", "Go-http-client/1.2")
+	httpRequest.Header.Set("Connection", "Close")
+
+	resp, err := conn.Do(httpRequest)
 	if err != nil {
-		fmt.Printf("Failed to parse response: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("Failed to send request: %v\n", err)
 	}
+
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("Failed to read body: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("Failed to read body: %v\n", err)
 	}
+
+	/*
+		request := "GET " + pullnext + " HTTP/1.2\r\n" +
+			"Host: icom-h.pi.rsfn.net.br\r\n" +
+			//"Accept: multipart/mixed\r\n" +
+			"Accept: application/xml\r\n" +
+			"Accept-Encoding: gzip\r\n" +
+			"User-Agent: Go-http-client/1.2\r\n" +
+			"Connection: Close\r\n\r\n"
+
+		_, err := conn.Write([]byte(request))
+		if err != nil {
+			fmt.Printf("Failed to write request: %v\n", err)
+			return nil, err
+		}
+
+		reader := bufio.NewReader(conn)
+		resp, err := http.ReadResponse(reader, nil)
+		if err != nil {
+			fmt.Printf("Failed to parse response: %v\n", err)
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("Failed to read body: %v\n", err)
+			return nil, err
+		}*/
 
 	var decompressedMessage []byte
 
@@ -93,15 +122,19 @@ func GetMessage(conn *tls.Conn, pullnext string) (*GetMessageResponse, error) {
 		fmt.Printf("Headers: %v\n", resp.Header)
 	}*/
 
-	if pullnext == "/api/v1/out/52833288/stream/start" {
+	if pullnext == "start" {
 		fmt.Println("Stream started successfully.")
 	}
+
+	rawPiPullNext := resp.Header.Get("PI-Pull-Next")
+	piPullNextContent := strings.Split(rawPiPullNext, "/")
+	piPullNextId := piPullNextContent[len(piPullNextContent)-1]
 
 	return &GetMessageResponse{
 		StatusCode: resp.StatusCode,
 		Headers:    resp.Header,
 		Message:    string(decompressedMessage),
-		PIPullNext: resp.Header.Get("PI-Pull-Next"),
+		PIPullNext: piPullNextId,
 		resourceID: resp.Header.Get("Pi-Resourceid"),
 	}, nil
 }

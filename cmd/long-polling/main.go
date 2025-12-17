@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"mTLS/services"
 	"mime/multipart"
+	"os"
 	"time"
 )
 
@@ -43,15 +44,15 @@ type Amount struct {
 const debug = false
 
 func main() {
-	conn := services.CreateConnection(debug)
-	/*fmt.Println("=== TLS Connection Test Completed ===")
-	fmt.Println("Sending HTTP/1.0 request...")*/
+	ISPB := os.Getenv("ISPB")
+	//conn := services.CreateConnection(debug)
+	conn := services.CreateConnectionV2(debug, false)
 
 	var response *services.GetMessageResponse
 
-	response, err := services.GetMessages(conn, "start")
+	response, err := services.GetMessages(conn, "start", ISPB)
 	if err != nil {
-		_ = services.FinishStream(conn, response.PIPullNext)
+		//_ = services.FinishStream(conn, response.PIPullNext)
 		panic("Error getting messages: %v\n" + err.Error())
 		return
 	}
@@ -60,8 +61,8 @@ func main() {
 
 	for {
 		time.Sleep(1 * time.Second)
-		connection := services.CreateConnection(debug)
-		response, err = services.GetMessages(connection, response.PIPullNext)
+		connection := services.CreateConnectionV2(debug, false)
+		response, err = services.GetMessages(connection, response.PIPullNext, ISPB)
 		if err != nil {
 			//			services.FinishStream(connection, response.PIPullNext)
 			fmt.Printf("Error getting messages: %v\n", err)

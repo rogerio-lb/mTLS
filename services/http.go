@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"net/http"
 	"os"
+	"time"
 )
 
 func ConfigureMTLS() *tls.Config {
@@ -49,4 +51,30 @@ func CreateConnection(debug bool) *tls.Conn {
 	}
 
 	return conn
+}
+
+func CreateConnectionV2(debug bool, useMTLS bool) *http.Client {
+	protocols := &http.Protocols{}
+	protocols.SetHTTP1(true)
+	protocols.SetHTTP2(true)
+	protocols.SetUnencryptedHTTP2(true)
+	httpTransporter := http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		ForceAttemptHTTP2:     false,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		Protocols:             protocols,
+		//		DisableCompression:    !config.Compressed,
+	}
+
+	if useMTLS == true {
+		httpTransporter.TLSClientConfig = ConfigureMTLS()
+		return &http.Client{Transport: &httpTransporter}
+	}
+
+	httpClient := &http.Client{}
+
+	return httpClient
 }
