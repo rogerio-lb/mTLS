@@ -180,12 +180,12 @@ func FinishStream(conn *tls.Conn, pullNext string) error {
 	return nil
 }
 
-func PostMessage(conn *tls.Conn, content string, boundary string) error {
+func PostMessage(conn *http.Client, content string, boundary string) error {
 	fmt.Println("Sending message...")
 
 	contentLength := len(content)
 
-	var request string
+	/*var request string
 
 	if boundary != "" {
 		request = "POST /api/v1/in/52833288/msgs HTTP/1.1\r\n" +
@@ -218,6 +218,30 @@ func PostMessage(conn *tls.Conn, content string, boundary string) error {
 	resp, err := http.ReadResponse(reader, nil)
 	if err != nil {
 		fmt.Printf("Failed to parse response: %v\n", err)
+		return err
+	}*/
+
+	bodyReader := bytes.NewReader([]byte(content))
+
+	request, err := http.NewRequest("POST", "http://localhost:3000/api/v1/in/52833288/msgs", bodyReader)
+	if err != nil {
+		fmt.Printf("Failed to create request: %v\n", err)
+		return err
+	}
+
+	request.Host = "icom-h.pi.rsfn.net.br"
+	request.Header.Set("Content-Encoding", "gzip")
+	request.Header.Set("Content-Length", strconv.Itoa(contentLength))
+	request.Header.Set("User-Agent", "Go-http-client/1.1")
+	if boundary != "" {
+		request.Header.Set("Content-Type", "multipart/mixed; boundary="+boundary)
+	} else {
+		request.Header.Set("Content-Type", "application/xml; charset=utf-8")
+	}
+
+	resp, err := conn.Do(request)
+	if err != nil {
+		fmt.Printf("Failed to send request: %v\n", err)
 		return err
 	}
 

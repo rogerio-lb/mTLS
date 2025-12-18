@@ -117,7 +117,7 @@ func respondPacs008(message Envelope) {
 		panic("Error adding XML part: " + err.Error())
 	}
 
-	conn := services.CreateConnection(debug)
+	conn := services.CreateConnectionV2(debug, false)
 
 	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
 	if err != nil {
@@ -149,7 +149,7 @@ func respondPacs004(message Envelope) {
 		panic("Error adding XML part: " + err.Error())
 	}
 
-	conn := services.CreateConnection(debug)
+	conn := services.CreateConnectionV2(debug, false)
 
 	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
 	if err != nil {

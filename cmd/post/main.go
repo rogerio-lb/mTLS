@@ -10,7 +10,7 @@ import (
 const debug = false
 
 func main() {
-	conn := services.CreateConnection(debug)
+	conn := services.CreateConnectionV2(debug, false)
 
 	if conn == nil {
 		panic("Failed to create TLS connection")
@@ -30,17 +30,19 @@ func main() {
 			services.FRAUD_REASON,
 		)*/
 
-		/*message := services.GeneratePacs008Manual(
-			"99999004",
+		message := services.GeneratePacs008Manual(
+			"04902979",
 			"003816482",
 			"0001",
 			"43528405058",
 			"CACC",
 			"10.00",
 			"Teste de envio",
-		)*/
+		)
 
-		message := services.GeneratePacs008Dict(
+		//fmt.Println(message)
+
+		/*message := services.GeneratePacs008Dict(
 			"99999004",
 			"003816482",
 			"0001",
@@ -49,7 +51,7 @@ func main() {
 			"10.00",
 			"Teste de envio",
 			"+5531982661780",
-		)
+		)*/
 
 		err := services.AddXMLPart(mw, message)
 
