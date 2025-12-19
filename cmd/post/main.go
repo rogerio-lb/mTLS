@@ -10,7 +10,7 @@ import (
 const debug = false
 
 func main() {
-	ISPB := "52833288"
+	ISPB := "04902979"
 
 	conn := services.CreateConnectionV2(debug, false)
 
@@ -25,14 +25,15 @@ func main() {
 	for i := 0; i < 1; i++ {
 		//message := services.CreateMessage()
 
-		/*message := services.GeneratePacs004ForDict(
-			"E54811417202512041739bJrrfAFhvUy",
-			"54811417",
+		message := services.GeneratePacs004ForDict(
+			"E52833288202512191710eyaUu9DK5jg",
+			"52833288",
 			"10.00",
-			services.FRAUD_REASON,
-		)*/
+			services.USER_REQUEST_REASON,
+			ISPB,
+		)
 
-		message := services.GeneratePacs008Manual(
+		/*message := services.GeneratePacs008Manual(
 			"04902979",
 			"003816482",
 			"0001",
@@ -40,7 +41,7 @@ func main() {
 			"CACC",
 			"10.00",
 			"Teste de envio",
-		)
+		)*/
 
 		//fmt.Println(message)
 

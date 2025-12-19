@@ -325,7 +325,7 @@ var pacs004_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>52833288</Id>
+                        <Id>%s</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
@@ -369,7 +369,7 @@ var pacs004_dict = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                     <DbtrAgt>
                         <FinInstnId>
                             <ClrSysMmbId>
-                                <MmbId>52833288</MmbId>
+                                <MmbId>%s</MmbId>
                             </ClrSysMmbId>
                         </FinInstnId>
                     </DbtrAgt>
@@ -1261,13 +1261,14 @@ func GeneratePacs002(e2eID, ispb string) string {
 	return str
 }
 
-func GeneratePacs004ForDict(e2eID, ispb, value, reason string) string {
+func GeneratePacs004ForDict(e2eID, ispb, value, reason, originIspb string) string {
 	now := getCurrentTime().UTC()
 	id, _ := GenerateMsgId("52833288")
 	returnId := GenerateReturnId("52833288")
 
 	ready := fmt.Sprintf(
 		pacs004_dict,
+		originIspb,
 		id,
 		now.Format("2006-01-02T15:04:05.000Z"),
 		id,
@@ -1276,6 +1277,7 @@ func GeneratePacs004ForDict(e2eID, ispb, value, reason string) string {
 		e2eID,
 		value,
 		reason,
+		originIspb,
 		ispb,
 	) //pacs004
 	str, err := SignMessage(ready)
