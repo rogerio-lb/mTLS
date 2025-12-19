@@ -393,7 +393,7 @@ var pacs002 = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <FIId>
                 <FinInstnId>
                     <Othr>
-                        <Id>52833288</Id>
+                        <Id>%s</Id>
                     </Othr>
                 </FinInstnId>
             </FIId>
@@ -1246,12 +1246,12 @@ func GeneratePacs008Dict(ispb, account, branch, document, accountType, amount, m
 	return str
 }
 
-func GeneratePacs002(e2eID string) string {
+func GeneratePacs002(e2eID, ispb string) string {
 	now := getCurrentTime().UTC()
 	//endToEndID, _ := GenerateEndToEndId("52833288", now)
-	id, _ := GenerateMsgId("52833288")
+	id, _ := GenerateMsgId(ispb)
 
-	ready := fmt.Sprintf(pacs002, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), e2eID, e2eID) //pacs002
+	ready := fmt.Sprintf(pacs002, ispb, id, now.Format("2006-01-02T15:04:05.000Z"), id, now.Format("2006-01-02T15:04:05.000Z"), e2eID, e2eID) //pacs002
 	str, err := SignMessage(ready)
 	if err != nil {
 		fmt.Println("Error calling Java function:", err)
