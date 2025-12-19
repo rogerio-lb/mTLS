@@ -59,7 +59,7 @@ func main() {
 		return
 	}
 
-	handleIncomingMessage(response.Message)
+	handleIncomingMessage(response.Message, ISPB)
 
 	for {
 		time.Sleep(1 * time.Second)
@@ -71,7 +71,7 @@ func main() {
 			break
 		}
 
-		go handleIncomingMessage(response.Message)
+		go handleIncomingMessage(response.Message, ISPB)
 	}
 
 	//services.FinishStream(conn, "/api/v1/out/52833288/stream/11e5d52c-e302-4aec-af0a-83b3f068d26a")
@@ -81,7 +81,7 @@ func main() {
 	handleIncomingMessage(message)
 }*/
 
-func handleIncomingMessage(message string) {
+func handleIncomingMessage(message, ispb string) {
 	var parseMessage Envelope
 
 	if message == "" {
@@ -97,13 +97,13 @@ func handleIncomingMessage(message string) {
 	/*fmt.Printf("Parsed Message:\n")
 	fmt.Println("Message Type: ", parseMessage.XMLName.Space)*/
 
-	handleMessage(parseMessage, message)
+	handleMessage(parseMessage, message, ispb)
 }
 
-func respondPacs008(message Envelope) {
+func respondPacs008(message Envelope, ispb string) {
 	e2eID := message.Document.TransferPacs008.EndToEndId
 
-	pacs002 := services.GeneratePacs002(e2eID)
+	pacs002 := services.GeneratePacs002(e2eID, ispb)
 
 	var responseContent bytes.Buffer
 
@@ -125,13 +125,13 @@ func respondPacs008(message Envelope) {
 
 	conn := services.CreateConnectionV2(debug, false)
 
-	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
+	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary(), ispb)
 	if err != nil {
 		fmt.Println("Error posting message:", err)
 	}
 }
 
-func respondPacs004(message Envelope) {
+func respondPacs004(message Envelope, ispb string) {
 	e2eID := message.Document.TransferPacs004.OriginalEndToEndId
 	returnId := message.Document.TransferPacs004.ReturnID
 
@@ -157,13 +157,13 @@ func respondPacs004(message Envelope) {
 
 	conn := services.CreateConnectionV2(debug, false)
 
-	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
+	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary(), ispb)
 	if err != nil {
 		fmt.Println("Error posting message:", err)
 	}
 }
 
-func handleMessage(message Envelope, rawMessage string) {
+func handleMessage(message Envelope, rawMessage, ispb string) {
 	if message.XMLName.Space == "https://www.bcb.gov.br/pi/pacs.002/1.15" {
 		fmt.Println()
 		fmt.Println("==================================== Received PACS002 ====================================")
@@ -193,7 +193,7 @@ func handleMessage(message Envelope, rawMessage string) {
 
 		fmt.Println("Raw Message: ", rawMessage)
 
-		respondPacs008(message)
+		respondPacs008(message, ispb)
 
 		return
 	}
@@ -208,7 +208,7 @@ func handleMessage(message Envelope, rawMessage string) {
 		fmt.Println("Reason for Return: ", message.Document.TransferPacs004.ReturnID)
 		fmt.Println("==================================== End of PACS004 ====================================")
 
-		respondPacs004(message)
+		respondPacs004(message, ispb)
 	}
 
 	fmt.Println("Received: ", message.XMLName.Space)
