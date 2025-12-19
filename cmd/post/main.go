@@ -10,6 +10,8 @@ import (
 const debug = false
 
 func main() {
+	ISPB := "52833288"
+
 	conn := services.CreateConnectionV2(debug, false)
 
 	if conn == nil {
@@ -71,7 +73,7 @@ func main() {
 		return
 	}
 
-	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary())
+	err = services.PostMessage(conn, string(compressedMessage.Bytes()), mw.Boundary(), ISPB)
 	//err = services.PostMessage(conn, string(responseContent.Bytes()), mw.Boundary())
 	//err = services.PostMessage(conn, message, "")
 	if err != nil {
