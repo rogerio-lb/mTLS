@@ -180,7 +180,7 @@ func FinishStream(conn *tls.Conn, pullNext string) error {
 	return nil
 }
 
-func PostMessage(conn *http.Client, content string, boundary string) error {
+func PostMessage(conn *http.Client, content, boundary, ispb string) error {
 	fmt.Println("Sending message...")
 
 	contentLength := len(content)
@@ -223,7 +223,9 @@ func PostMessage(conn *http.Client, content string, boundary string) error {
 
 	bodyReader := bytes.NewReader([]byte(content))
 
-	request, err := http.NewRequest("POST", "http://localhost:3000/api/v1/in/52833288/msgs", bodyReader)
+	url := fmt.Sprintf("http://localhost:3000/api/v1/in/%s/msgs", ispb)
+
+	request, err := http.NewRequest("POST", url, bodyReader)
 	if err != nil {
 		fmt.Printf("Failed to create request: %v\n", err)
 		return err
